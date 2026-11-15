@@ -113,7 +113,7 @@ for (const id of ORDER) {
   sectors[id] = { sec, pan };
 }
 const lobbyTitle = panel(1.5, 0.3, 1024, 205, (g, w, h) => {
-  g.textAlign = "center"; g.fillStyle = N.ink; g.font = `700 72px ${FONT}`; track(g, -2); g.fillText("Núcleo", w / 2, 88); track(g, 0);
+  g.textAlign = "center"; g.fillStyle = N.ink; g.font = `700 72px ${FONT}`; track(g, -2); g.fillText("Orbe", w / 2, 88); track(g, 0);
   g.fillStyle = N.muted; g.font = `500 28px ${FONT}`; g.fillText("Elige un lugar", w / 2, 150);
   if (TUNING.diagnostico) { g.font = `500 20px ${FONT}`; g.fillText(`${app.xr ? "VR" : "Pantalla"} · ${haptics.describe()}`, w / 2, 192); }   // diagnóstico de mandos y vibración
   g.textAlign = "left";
@@ -388,9 +388,11 @@ if (document.fonts) Promise.all([500, 600, 700].map((w) => document.fonts.load(`
 
 /* ---------- modelos GLB (opcionales) ---------- */
 const loader = new GLTFLoader(), glb = {}; window.__nucleo.glb = glb;
+const LOAD = { done: 0, total: 0 };
 function loadGLB(key, parent) {
-  const cfg = GLB[key];
+  const cfg = GLB[key]; LOAD.total++;
   loader.load(cfg.file, (res) => {
+    LOAD.done++;
     const root = res.scene; root.position.fromArray(cfg.position); root.rotation.y = cfg.rotationY * DEG; root.scale.setScalar(cfg.scale); root.scale.y *= cfg.scaleY ?? 1;
     parent.add(root); glb[key] = root;
     if (cfg.scatter) scatterGLB(root, cfg);
@@ -403,7 +405,7 @@ function loadGLB(key, parent) {
     });
     registerVoces(root);
     console.info(`[Núcleo] GLB cargado: ${cfg.file}`);
-  }, undefined, () => console.info(`[Núcleo] sin ${cfg.file}: se usa la escena generada`));
+  }, undefined, () => { LOAD.done++; console.info(`[Núcleo] sin ${cfg.file}: se usa la escena generada`); });
 }
 /** Aprovecha los 360°: reparte o copia elementos del modelo alrededor del centro del domo.
     Reglas (cfg.scatter): hide oculta; copy copia el elemento a cada sector; distribute manda cada elemento a un sector al azar
@@ -827,39 +829,68 @@ window.addEventListener("keydown", (ev) => {
 
 /* ---------- arranque ---------- */
 const $ = (id) => document.getElementById(id);
-/* ---------- pantalla de carga: "núcleo" aparece letra por letra con la ola del leitmotiv, salta con el acorde y da paso al lobby ---------- */
-const INTRO = { group: null, letters: [], line: null, sub: null, t0: 0, hit: false, word: "núcleo" };
+/* ---------- pantalla de carga "Amanecer": el borde de un mundo oscuro se enciende con la carga, del centro hacia los lados; cada
+   ambiente deja su marca de color sobre el horizonte. "Orbe" aparece letra por letra con la ola del leitmotiv y salta con el acorde. ---------- */
+const INTRO = { group: null, letters: [], strips: [], marks: [], rim: null, disc: null, sub: null, subText: "", t0: 0, hit: false, word: "Orbe", R: 2.0, top: -0.44, half: 1.2, seg: 120 };
 function buildIntro() {
   if (INTRO.group) return;
-  const grp = INTRO.group = new THREE.Group(), PX = 0.001, H = 320, font = `600 210px ${FONT}`, track = 14;
-  const mk = (w, h, draw) => { const cv = document.createElement("canvas"); cv.width = w; cv.height = h; draw(cv.getContext("2d")); const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
-    const m = new THREE.Mesh(new THREE.PlaneGeometry(w * PX, h * PX), new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0, depthTest: false, depthWrite: false })); m.renderOrder = 30; grp.add(m); return m; };
+  const grp = INTRO.group = new THREE.Group(), PX = 0.001, H = 320, font = `600 210px ${FONT}`, track = 2, { R, top, half, seg } = INTRO, cy = top - R;
+  const flat = (o) => new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthTest: false, depthWrite: false, ...o });
+  const mk = (w, h, draw) => { const cv = document.createElement("canvas"); cv.width = w; cv.height = h; const g = cv.getContext("2d"); draw(g, w, h); const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w * PX, h * PX), flat({ map: tex })); m.renderOrder = 30; m.userData = { g, tex, w, h }; grp.add(m); return m; };
+  // el mundo: un disco apenas más claro que el vacío y su borde como línea fina
+  INTRO.disc = new THREE.Mesh(new THREE.CircleGeometry(R, 160), flat({ color: 0x0b0b0b })); INTRO.disc.position.set(0, cy, -0.004); INTRO.disc.renderOrder = 26; grp.add(INTRO.disc);
+  INTRO.rim = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(Array.from({ length: 200 }, (_, i) => new THREE.Vector3(R * Math.sin((i / 200) * TAU), cy + R * Math.cos((i / 200) * TAU), -0.003))), flat({ color: 0x3c3c3c })); INTRO.rim.renderOrder = 27; grp.add(INTRO.rim);
+  // la atmósfera: tres bandas sobre el borde (halo interior, filo blanco, halo exterior) cuyo brillo se actualiza por vértice
+  const strip = (r0, r1, c0, c1) => {
+    const pos = new Float32Array((seg + 1) * 6), col = new Float32Array((seg + 1) * 6), idx = [];
+    for (let i = 0; i <= seg; i++) { const th = -half + (2 * half * i) / seg, sn = Math.sin(th), cs = Math.cos(th); pos.set([r0 * sn, cy + r0 * cs, 0, r1 * sn, cy + r1 * cs, 0], i * 6); if (i < seg) idx.push(i * 2, i * 2 + 1, i * 2 + 2, i * 2 + 1, i * 2 + 3, i * 2 + 2); }
+    const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.BufferAttribute(pos, 3)); geo.setAttribute("color", new THREE.BufferAttribute(col, 3)); geo.setIndex(idx);
+    const m = new THREE.Mesh(geo, flat({ vertexColors: true, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, opacity: 1 })); m.renderOrder = 28; m.userData = { c0, c1 }; grp.add(m); INTRO.strips.push(m);
+  };
+  strip(R - 0.035, R - 0.003, [0, 0, 0], [0.16, 0.17, 0.2]); strip(R - 0.003, R + 0.003, [1, 1, 1], [1, 1, 1]); strip(R + 0.003, R + 0.11, [0.13, 0.16, 0.24], [0, 0, 0]);
+  // una marca por ambiente, en su color, flotando sobre el horizonte
+  ORDER.forEach((id, i) => { const th = (i - 1) * 0.74, m = new THREE.Mesh(new THREE.PlaneGeometry(0.09, 0.006), flat({ color: lit(AMBIENTES[id].color) })); m.position.set((R + 0.03) * Math.sin(th), cy + (R + 0.03) * Math.cos(th), 0.001); m.rotation.z = -th; m.renderOrder = 29; grp.add(m); INTRO.marks.push(m); });
+  // el nombre, letra por letra
   const probe = document.createElement("canvas").getContext("2d"); probe.font = font;
   const ws = [...INTRO.word].map((c) => probe.measureText(c).width), total = ws.reduce((a, b) => a + b, 0) + track * (ws.length - 1); let x = -total / 2;
   [...INTRO.word].forEach((c, i) => {
     const w = Math.ceil(ws[i]) + 60, m = mk(w, H, (g) => { g.font = font; g.textAlign = "center"; g.textBaseline = "alphabetic"; g.fillStyle = N.ink; g.fillText(c, w / 2, 232); });
-    m.userData.x = (x + ws[i] / 2) * PX; m.position.x = m.userData.x; INTRO.letters.push(m); x += ws[i] + track;
+    m.userData.x = (x + ws[i] / 2) * PX; m.position.set(m.userData.x, 0.1, 0); INTRO.letters.push(m); x += ws[i] + track;
   });
-  INTRO.line = new THREE.Mesh(new THREE.PlaneGeometry(total * PX, 0.003), new THREE.MeshBasicMaterial({ color: N.signal, transparent: true, opacity: 0, depthTest: false })); INTRO.line.renderOrder = 30; INTRO.line.position.y = -0.105; grp.add(INTRO.line);
-  INTRO.sub = mk(900, 80, (g) => { g.font = `500 30px ${FONT}`; g.textAlign = "center"; g.fillStyle = N.muted; try { g.letterSpacing = "10px"; } catch (e) { /* sin tracking */ } g.fillText("EARTH JUKEBOX", 450, 52); }); INTRO.sub.position.y = -0.17;
-  grp.scale.setScalar(1.6); scene.add(grp);
+  INTRO.sub = mk(1400, 80, () => {}); INTRO.sub.position.y = -0.045; INTRO.sub.scale.setScalar(1.5);
+  grp.scale.setScalar(0.95); scene.add(grp);
+}
+function introSub(text) {
+  if (text === INTRO.subText) return; INTRO.subText = text; const { g, tex, w, h } = INTRO.sub.userData;
+  g.clearRect(0, 0, w, h); g.font = `500 34px ${FONT}`; g.textAlign = "center"; g.fillStyle = N.muted; g.fillText(text, w / 2, 52); tex.needsUpdate = true;
 }
 function updateIntro() {
   const T = synth.ctx ? synth.ctx.currentTime - INTRO.t0 : 99, grp = INTRO.group, ss = (x) => { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); };
-  if (T < 0.6) { camera.getWorldPosition(hp2); grp.position.set(hp2.x, hp2.y - 0.02, hp2.z - 1.7); }      // a la altura de tus ojos
-  const out = 1 - ss((T - 5.4) / 1.1), hitK = T > 1.85 ? Math.exp(-(T - 1.85) * 4) : 0;
-  if (T > 1.85 && !INTRO.hit) { INTRO.hit = true; hx(null, "diente"); }                                  // la ola rompe: un solo toque
+  if (T < 0.6) { camera.getWorldPosition(hp2); grp.position.set(hp2.x, hp2.y, hp2.z - 1.7); }             // a la altura de tus ojos
+  const out = 1 - ss((T - 5.4) / 1.1), fadeIn = ss(T / 0.6), hitK = T > 1.85 ? Math.exp(-(T - 1.85) * 4) : 0;
+  const p = Math.min(clamp(T / 3.5, 0, 1), 0.12 + 0.88 * (LOAD.total ? LOAD.done / LOAD.total : 1));       // la carga real manda si va más lenta que la música
+  if (T > 1.85 && !INTRO.hit) { INTRO.hit = true; hx(null, "diente"); }                                   // la ola rompe: un solo toque
+  // amanecer: la luz nace en lo alto del horizonte y se abre hacia los lados
+  const span = 0.98 * ss(p) + 0.02, power = (0.45 + 0.55 * p + 0.6 * hitK) * out, { half, seg } = INTRO;
+  for (const m of INTRO.strips) {
+    const col = m.geometry.attributes.color.array, { c0, c1 } = m.userData;
+    for (let i = 0; i <= seg; i++) { const th = Math.abs(-half + (2 * half * i) / seg), k = ss((span - th) / 0.3) * power, o = i * 6; col[o] = c0[0] * k; col[o + 1] = c0[1] * k; col[o + 2] = c0[2] * k; col[o + 3] = c1[0] * k; col[o + 4] = c1[1] * k; col[o + 5] = c1[2] * k; }
+    m.geometry.attributes.color.needsUpdate = true;
+  }
+  INTRO.disc.material.opacity = fadeIn * out; INTRO.rim.material.opacity = 0.7 * fadeIn * out;
+  INTRO.marks.forEach((m, i) => { const k = ss((p - [0.33, 0.66, 0.955][i]) / 0.03); m.material.opacity = k * out; m.scale.setScalar(0.6 + 0.4 * k); });
   INTRO.letters.forEach((m, i) => {
-    const a = ss((T - 0.15 - i * 0.27) / 0.5), j = clamp((T - 3.57 - i * 0.07) / 0.5, 0, 1);              // aparece con la ola · salta con el acorde
-    m.material.opacity = a * out; m.position.y = (a - 1) * 0.03 + 0.11 * Math.sin(Math.PI * j) * (1 - 0.35 * j); m.scale.setScalar(1 + 0.09 * hitK + 0.06 * Math.sin(Math.PI * j));
+    const a = ss((T - 0.15 - i * 0.3) / 0.55), j = clamp((T - 3.57 - i * 0.08) / 0.5, 0, 1);              // aparece con la ola · salta con el acorde
+    m.material.opacity = a * out; m.position.y = 0.1 + (a - 1) * 0.03 + 0.1 * Math.sin(Math.PI * j) * (1 - 0.35 * j); m.scale.setScalar(1 + 0.07 * hitK + 0.06 * Math.sin(Math.PI * j));
   });
-  const la = ss((T - 0.1) / 1.75); INTRO.line.scale.x = Math.max(0.001, la); INTRO.line.position.x = -(1 - la) * INTRO.line.geometry.parameters.width / 2; INTRO.line.material.opacity = (0.35 + 0.65 * hitK) * Math.min(1, la * 4) * out;
-  INTRO.sub.material.opacity = 0.9 * ss((T - 2.0) / 1.2) * out;
+  const n = p >= 0.955 ? 3 : p >= 0.66 ? 2 : p >= 0.33 ? 1 : 0;
+  introSub(p >= 0.999 ? "Listo · 3 de 3 ambientes" : `Preparando el mundo · ${Math.round(p * 100)} % · ${n} de 3 ambientes`); INTRO.sub.material.opacity = 0.95 * ss((T - 0.5) / 0.8) * out;
   if (T > 6.6) endIntro();
 }
 function endIntro() {
   if (app.state !== "intro") return;
-  INTRO.group.visible = false; $("ayuda").hidden = app.xr;
+  INTRO.group.visible = false; scene.background.setHex(0x080808); $("ayuda").hidden = app.xr;
   goLobby(true); yaw = 0; pitch = 0;                                                                      // aterrizas en silencio…
   setTimeout(() => { if (app.state === "lobby") synth.setLevel(TUNING.lobbyLevel ?? 0.16); }, (TUNING.silencioLobby ?? 1.6) * 1000);   // …y después entra la sala
 }
@@ -872,11 +903,11 @@ async function begin(vr) {
       const session = await navigator.xr.requestSession("immersive-vr", { optionalFeatures: ["local-floor", "bounded-floor"] });
       await renderer.xr.setSession(session); app.xr = true; haptics.setSources(session);
       session.addEventListener("inputsourceschange", () => haptics.setSources(session));
-      session.addEventListener("end", () => { app.xr = false; $("inicio").hidden = false; synth.stop(); app.state = "inicio"; if (INTRO.group) INTRO.group.visible = false; show(); });
+      session.addEventListener("end", () => { app.xr = false; $("inicio").hidden = false; synth.stop(); app.state = "inicio"; if (INTRO.group) INTRO.group.visible = false; scene.background.setHex(0x080808); show(); });
     } catch (e) { $("estado").textContent = "No se pudo entrar a VR: " + e.message; app.xr = false; }
   }
   $("inicio").hidden = true; $("ayuda").hidden = true; yaw = 0; pitch = 0;
-  buildIntro(); INTRO.group.visible = true; INTRO.hit = false; INTRO.letters.forEach((m) => (m.material.opacity = 0));
+  buildIntro(); INTRO.group.visible = true; INTRO.hit = false; scene.background.setHex(0x000000); INTRO.letters.forEach((m) => (m.material.opacity = 0));
   app.state = "intro"; show(); INTRO.t0 = synth.ctx.currentTime + (vr ? 0.9 : 0.35);                      // en el visor, un respiro para que la imagen llegue antes que el sonido
   const lm = LEITMOTIV[TUNING.leitmotiv];                  // la firma sonora: va directa a la salida, sincronizada con las letras
   if (lm) { try { const g = synth.ctx.createGain(); g.gain.value = 0.72; g.connect(synth.ctx.destination); lm.play(synth.ctx, g, INTRO.t0); } catch (e) { /* sin leitmotiv: la carga sigue */ } }

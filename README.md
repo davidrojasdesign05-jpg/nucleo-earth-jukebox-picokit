@@ -1,4 +1,5 @@
 # Núcleo · Earth Jukebox (WebXR) · versión PicoKit
+n**Sitio publicado:** https://orbe-vr.pages.dev/
 
 Copia del proyecto con el kit de integración PICO 4 Ultra del equipo: voces del modelo señalables con vibración,
 rayo de 25 m, vibración con los valores del kit y mapeo de botones para explorar con las manos. El original está en `../NucleoWeb`.

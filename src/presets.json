@@ -1,0 +1,4000 @@
+{
+ "steps": 16,
+ "pentatonic": [
+  0,
+  2,
+  4,
+  7,
+  9
+ ],
+ "signatures": {
+  "jungla": {
+   "label": "Jungla",
+   "tempo": 104,
+   "geo": {
+    "type": "lowpass",
+    "hz": 900,
+    "q": 0.4,
+    "swellHz": 0.23,
+    "depth": 0.25,
+    "gain": 0.16
+   },
+   "voices": [
+    {
+     "id": "bajo",
+     "name": "Bajo",
+     "band": "90–200 Hz",
+     "k": 3,
+     "rot": 0,
+     "hz": 165,
+     "haptic": {
+      "hz": 70,
+      "amp": 0.85,
+      "ms": 40
+     }
+    },
+    {
+     "id": "arpegio",
+     "name": "Arpegio",
+     "band": "2.3–4 kHz",
+     "k": 5,
+     "rot": 2,
+     "rootMidi": 98,
+     "haptic": {
+      "hz": 200,
+      "amp": 0.45,
+      "ms": 20
+     }
+    },
+    {
+     "id": "pulso",
+     "name": "Pulso",
+     "band": "5.6 kHz",
+     "k": 9,
+     "rot": 1,
+     "hz": 5600,
+     "amHz": 22,
+     "haptic": {
+      "hz": 320,
+      "amp": 0.3,
+      "ms": 12
+     }
+    },
+    {
+     "id": "canto",
+     "name": "Canto",
+     "band": "500–900 Hz",
+     "k": 1,
+     "rot": 12,
+     "hz": 620,
+     "haptic": {
+      "hz": 120,
+      "amp": 0.6,
+      "ms": 150
+     }
+    }
+   ]
+  },
+  "hielo": {
+   "label": "Hielo marino",
+   "tempo": 52,
+   "pressure": {
+    "type": "heat",
+    "hz": 55
+   },
+   "geo": {
+    "type": "bandpass",
+    "hz": 520,
+    "q": 1.1,
+    "swellHz": 0.07,
+    "depth": 0.6,
+    "gain": 0.3
+   },
+   "voices": [
+    {
+     "id": "bajo",
+     "name": "Bajo",
+     "band": "60–90 Hz",
+     "k": 2,
+     "rot": 0,
+     "hz": 88,
+     "haptic": {
+      "hz": 60,
+      "amp": 0.85,
+      "ms": 60
+     }
+    },
+    {
+     "id": "arpegio",
+     "name": "Arpegio",
+     "band": "2.4–3.6 kHz",
+     "k": 3,
+     "rot": 5,
+     "rootMidi": 99,
+     "haptic": {
+      "hz": 220,
+      "amp": 0.4,
+      "ms": 24
+     }
+    },
+    {
+     "id": "pulso",
+     "name": "Pulso",
+     "band": "6.2 kHz",
+     "k": 5,
+     "rot": 2,
+     "hz": 6200,
+     "amHz": 0,
+     "haptic": {
+      "hz": 340,
+      "amp": 0.3,
+      "ms": 10
+     }
+    },
+    {
+     "id": "canto",
+     "name": "Canto",
+     "band": "600–800 Hz",
+     "k": 1,
+     "rot": 10,
+     "hz": 660,
+     "haptic": {
+      "hz": 110,
+      "amp": 0.55,
+      "ms": 220
+     }
+    }
+   ]
+  },
+  "gases": {
+   "label": "Gases de efecto invernadero",
+   "tempo": 60,
+   "geo": {
+    "type": "lowpass",
+    "hz": 480,
+    "q": 0.5,
+    "swellHz": 0.25,
+    "depth": 0.8,
+    "gain": 0.3
+   },
+   "voices": [
+    {
+     "id": "bajo",
+     "name": "Bajo",
+     "band": "70–100 Hz",
+     "k": 2,
+     "rot": 0,
+     "hz": 98,
+     "haptic": {
+      "hz": 60,
+      "amp": 0.85,
+      "ms": 90
+     }
+    },
+    {
+     "id": "arpegio",
+     "name": "Melodía",
+     "band": "520–880 Hz",
+     "k": 8,
+     "rot": 0,
+     "rootMidi": 72,
+     "melody": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      3,
+      1,
+      0
+     ],
+     "haptic": {
+      "hz": 150,
+      "amp": 0.45,
+      "ms": 30
+     }
+    },
+    {
+     "id": "pulso",
+     "name": "Pulso",
+     "band": "5 kHz",
+     "k": 7,
+     "rot": 1,
+     "hz": 5000,
+     "amHz": 0,
+     "haptic": {
+      "hz": 310,
+      "amp": 0.28,
+      "ms": 10
+     }
+    },
+    {
+     "id": "canto",
+     "name": "Canto",
+     "band": "390–590 Hz",
+     "k": 1,
+     "rot": 12,
+     "hz": 392,
+     "haptic": {
+      "hz": 100,
+      "amp": 0.6,
+      "ms": 240
+     }
+    }
+   ]
+  }
+ },
+ "presets": {
+  "jungla": {
+   "reference": {
+    "year": 0,
+    "value": 0,
+    "vital": {
+     "vit": 95,
+     "div": 100,
+     "est": 95,
+     "pre": 5,
+     "fever": 0
+    },
+    "masks": {
+     "bajo": 2113,
+     "arpegio": 37444,
+     "pulso": 22187,
+     "canto": 4096
+    },
+    "scaleSize": 5,
+    "jitterMs": 4,
+    "detuneCents": 2,
+    "bioCutoffHz": 11024,
+    "reverbWet": 0.327,
+    "anthroGain": 0.001,
+    "velocity": 0.975
+   },
+   "label": "Jungla",
+   "signature": "jungla",
+   "unit": "km² talados ese año",
+   "source": "INPE PRODES, Amazonia Legal",
+   "tempo": 104,
+   "years": [
+    {
+     "year": 1988,
+     "value": 21050,
+     "vital": {
+      "vit": 92.7,
+      "div": 97.9,
+      "est": 55.8,
+      "pre": 63,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2113,
+      "arpegio": 18722,
+      "pulso": 22187,
+      "canto": 512
+     },
+     "scaleSize": 5,
+     "jitterMs": 31,
+     "detuneCents": 18,
+     "bioCutoffHz": 4121,
+     "reverbWet": 0.176,
+     "anthroGain": 0.218,
+     "velocity": 0.964
+    },
+    {
+     "year": 1989,
+     "value": 17770,
+     "vital": {
+      "vit": 90.8,
+      "div": 96.2,
+      "est": 61.4,
+      "pre": 53.9,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2113,
+      "arpegio": 37440,
+      "pulso": 21675,
+      "canto": 1024
+     },
+     "scaleSize": 5,
+     "jitterMs": 27,
+     "detuneCents": 15,
+     "bioCutoffHz": 4809,
+     "reverbWet": 0.2,
+     "anthroGain": 0.16,
+     "velocity": 0.954
+    },
+    {
+     "year": 1990,
+     "value": 13730,
+     "vital": {
+      "vit": 89.3,
+      "div": 94.8,
+      "est": 68.4,
+      "pre": 42.8,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2113,
+      "arpegio": 37440,
+      "pulso": 21675,
+      "canto": 4096
+     },
+     "scaleSize": 5,
+     "jitterMs": 22,
+     "detuneCents": 13,
+     "bioCutoffHz": 5806,
+     "reverbWet": 0.229,
+     "anthroGain": 0.101,
+     "velocity": 0.947
+    },
+    {
+     "year": 1991,
+     "value": 11030,
+     "vital": {
+      "vit": 88.1,
+      "div": 93.7,
+      "est": 73,
+      "pre": 35.4,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2113,
+      "arpegio": 37440,
+      "pulso": 21675,
+      "canto": 4096
+     },
+     "scaleSize": 5,
+     "jitterMs": 19,
+     "detuneCents": 11,
+     "bioCutoffHz": 6582,
+     "reverbWet": 0.248,
+     "anthroGain": 0.069,
+     "velocity": 0.94
+    },
+    {
+     "year": 1992,
+     "value": 13786,
+     "vital": {
+      "vit": 86.6,
+      "div": 92.4,
+      "est": 68.3,
+      "pre": 43,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2113,
+      "arpegio": 37440,
+      "pulso": 21675,
+      "canto": 4096
+     },
+     "scaleSize": 5,
+     "jitterMs": 22,
+     "detuneCents": 13,
+     "bioCutoffHz": 5786,
+     "reverbWet": 0.228,
+     "anthroGain": 0.102,
+     "velocity": 0.933
+    },
+    {
+     "year": 1993,
+     "value": 14896,
+     "vital": {
+      "vit": 85,
+      "div": 90.9,
+      "est": 66.4,
+      "pre": 46,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2113,
+      "arpegio": 37440,
+      "pulso": 21675,
+      "canto": 2048
+     },
+     "scaleSize": 5,
+     "jitterMs": 24,
+     "detuneCents": 13,
+     "bioCutoffHz": 5499,
+     "reverbWet": 0.22,
+     "anthroGain": 0.116,
+     "velocity": 0.925
+    },
+    {
+     "year": 1994,
+     "value": 14896,
+     "vital": {
+      "vit": 83.4,
+      "div": 89.4,
+      "est": 66.4,
+      "pre": 46,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2113,
+      "arpegio": 37440,
+      "pulso": 21675,
+      "canto": 2048
+     },
+     "scaleSize": 5,
+     "jitterMs": 24,
+     "detuneCents": 13,
+     "bioCutoffHz": 5499,
+     "reverbWet": 0.22,
+     "anthroGain": 0.116,
+     "velocity": 0.917
+    },
+    {
+     "year": 1995,
+     "value": 29059,
+     "vital": {
+      "vit": 80.2,
+      "div": 86.5,
+      "est": 42,
+      "pre": 85,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2113,
+      "arpegio": 18722,
+      "pulso": 43348,
+      "canto": 0
+     },
+     "scaleSize": 5,
+     "jitterMs": 41,
+     "detuneCents": 23,
+     "bioCutoffHz": 2838,
+     "reverbWet": 0.119,
+     "anthroGain": 0.397,
+     "velocity": 0.901
+    },
+    {
+     "year": 1996,
+     "value": 18161,
+     "vital": {
+      "vit": 78.2,
+      "div": 84.8,
+      "est": 60.8,
+      "pre": 55,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2113,
+      "arpegio": 37440,
+      "pulso": 21674,
+      "canto": 0
+     },
+     "scaleSize": 5,
+     "jitterMs": 27,
+     "detuneCents": 16,
+     "bioCutoffHz": 4720,
+     "reverbWet": 0.197,
+     "anthroGain": 0.166,
+     "velocity": 0.891
+    },
+    {
+     "year": 1997,
+     "value": 13227,
+     "vital": {
+      "vit": 76.8,
+      "div": 83.4,
+      "est": 69.2,
+      "pre": 41.4,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2113,
+      "arpegio": 37440,
+      "pulso": 21674,
+      "canto": 0
+     },
+     "scaleSize": 5,
+     "jitterMs": 22,
+     "detuneCents": 12,
+     "bioCutoffHz": 5945,
+     "reverbWet": 0.232,
+     "anthroGain": 0.094,
+     "velocity": 0.884
+    },
+    {
+     "year": 1998,
+     "value": 17383,
+     "vital": {
+      "vit": 74.9,
+      "div": 81.7,
+      "est": 62.1,
+      "pre": 52.9,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2113,
+      "arpegio": 37440,
+      "pulso": 21674,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 27,
+     "detuneCents": 15,
+     "bioCutoffHz": 4891,
+     "reverbWet": 0.202,
+     "anthroGain": 0.154,
+     "velocity": 0.875
+    },
+    {
+     "year": 1999,
+     "value": 17259,
+     "vital": {
+      "vit": 73,
+      "div": 80,
+      "est": 62.3,
+      "pre": 52.5,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2113,
+      "arpegio": 37440,
+      "pulso": 21674,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 26,
+     "detuneCents": 15,
+     "bioCutoffHz": 4925,
+     "reverbWet": 0.204,
+     "anthroGain": 0.152,
+     "velocity": 0.865
+    },
+    {
+     "year": 2000,
+     "value": 18226,
+     "vital": {
+      "vit": 71,
+      "div": 78.2,
+      "est": 60.6,
+      "pre": 55.2,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2049,
+      "arpegio": 37440,
+      "pulso": 21674,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 28,
+     "detuneCents": 16,
+     "bioCutoffHz": 4704,
+     "reverbWet": 0.196,
+     "anthroGain": 0.168,
+     "velocity": 0.855
+    },
+    {
+     "year": 2001,
+     "value": 18165,
+     "vital": {
+      "vit": 69.1,
+      "div": 76.4,
+      "est": 60.7,
+      "pre": 55,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2049,
+      "arpegio": 4672,
+      "pulso": 21674,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 28,
+     "detuneCents": 16,
+     "bioCutoffHz": 4720,
+     "reverbWet": 0.197,
+     "anthroGain": 0.166,
+     "velocity": 0.845
+    },
+    {
+     "year": 2002,
+     "value": 21651,
+     "vital": {
+      "vit": 66.7,
+      "div": 74.3,
+      "est": 54.7,
+      "pre": 64.6,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2049,
+      "arpegio": 18722,
+      "pulso": 21674,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 32,
+     "detuneCents": 18,
+     "bioCutoffHz": 4011,
+     "reverbWet": 0.172,
+     "anthroGain": 0.23,
+     "velocity": 0.834
+    },
+    {
+     "year": 2003,
+     "value": 25396,
+     "vital": {
+      "vit": 64,
+      "div": 71.8,
+      "est": 48.3,
+      "pre": 74.9,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2049,
+      "arpegio": 18722,
+      "pulso": 21674,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 36,
+     "detuneCents": 21,
+     "bioCutoffHz": 3368,
+     "reverbWet": 0.145,
+     "anthroGain": 0.309,
+     "velocity": 0.82
+    },
+    {
+     "year": 2004,
+     "value": 27772,
+     "vital": {
+      "vit": 60.9,
+      "div": 69,
+      "est": 44.2,
+      "pre": 81.5,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2049,
+      "arpegio": 2338,
+      "pulso": 43348,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 39,
+     "detuneCents": 22,
+     "bioCutoffHz": 3011,
+     "reverbWet": 0.128,
+     "anthroGain": 0.365,
+     "velocity": 0.805
+    },
+    {
+     "year": 2005,
+     "value": 19014,
+     "vital": {
+      "vit": 58.9,
+      "div": 67.2,
+      "est": 59.3,
+      "pre": 57.3,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2049,
+      "arpegio": 4672,
+      "pulso": 21674,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 28,
+     "detuneCents": 16,
+     "bioCutoffHz": 4540,
+     "reverbWet": 0.191,
+     "anthroGain": 0.181,
+     "velocity": 0.795
+    },
+    {
+     "year": 2006,
+     "value": 14286,
+     "vital": {
+      "vit": 57.3,
+      "div": 65.8,
+      "est": 67.4,
+      "pre": 44.3,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2049,
+      "arpegio": 4672,
+      "pulso": 21674,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 23,
+     "detuneCents": 13,
+     "bioCutoffHz": 5660,
+     "reverbWet": 0.225,
+     "anthroGain": 0.108,
+     "velocity": 0.787
+    },
+    {
+     "year": 2007,
+     "value": 11651,
+     "vital": {
+      "vit": 56.1,
+      "div": 64.6,
+      "est": 72,
+      "pre": 37.1,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2049,
+      "arpegio": 4672,
+      "pulso": 21674,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 20,
+     "detuneCents": 11,
+     "bioCutoffHz": 6395,
+     "reverbWet": 0.244,
+     "anthroGain": 0.076,
+     "velocity": 0.781
+    },
+    {
+     "year": 2008,
+     "value": 12911,
+     "vital": {
+      "vit": 54.7,
+      "div": 63.3,
+      "est": 69.8,
+      "pre": 40.5,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2048,
+      "arpegio": 4672,
+      "pulso": 21674,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 21,
+     "detuneCents": 12,
+     "bioCutoffHz": 6037,
+     "reverbWet": 0.235,
+     "anthroGain": 0.09,
+     "velocity": 0.774
+    },
+    {
+     "year": 2009,
+     "value": 7464,
+     "vital": {
+      "vit": 53.9,
+      "div": 62.6,
+      "est": 79.2,
+      "pre": 25.5,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2048,
+      "arpegio": 4672,
+      "pulso": 21674,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 15,
+     "detuneCents": 8,
+     "bioCutoffHz": 7786,
+     "reverbWet": 0.274,
+     "anthroGain": 0.036,
+     "velocity": 0.77
+    },
+    {
+     "year": 2010,
+     "value": 7000,
+     "vital": {
+      "vit": 53.1,
+      "div": 61.9,
+      "est": 80,
+      "pre": 24.3,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2048,
+      "arpegio": 4672,
+      "pulso": 0,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 14,
+     "detuneCents": 8,
+     "bioCutoffHz": 7946,
+     "reverbWet": 0.277,
+     "anthroGain": 0.032,
+     "velocity": 0.766
+    },
+    {
+     "year": 2011,
+     "value": 6418,
+     "vital": {
+      "vit": 52.4,
+      "div": 61.3,
+      "est": 81,
+      "pre": 22.7,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2048,
+      "arpegio": 4672,
+      "pulso": 0,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 13,
+     "detuneCents": 8,
+     "bioCutoffHz": 8165,
+     "reverbWet": 0.281,
+     "anthroGain": 0.028,
+     "velocity": 0.762
+    },
+    {
+     "year": 2012,
+     "value": 4571,
+     "vital": {
+      "vit": 51.9,
+      "div": 60.8,
+      "est": 84.1,
+      "pre": 17.6,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2048,
+      "arpegio": 4672,
+      "pulso": 0,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 11,
+     "detuneCents": 6,
+     "bioCutoffHz": 8902,
+     "reverbWet": 0.294,
+     "anthroGain": 0.017,
+     "velocity": 0.76
+    },
+    {
+     "year": 2013,
+     "value": 5891,
+     "vital": {
+      "vit": 51.3,
+      "div": 60.2,
+      "est": 81.9,
+      "pre": 21.2,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2048,
+      "arpegio": 4672,
+      "pulso": 0,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 13,
+     "detuneCents": 7,
+     "bioCutoffHz": 8375,
+     "reverbWet": 0.285,
+     "anthroGain": 0.025,
+     "velocity": 0.757
+    },
+    {
+     "year": 2014,
+     "value": 5012,
+     "vital": {
+      "vit": 50.7,
+      "div": 59.7,
+      "est": 83.4,
+      "pre": 18.8,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2048,
+      "arpegio": 4672,
+      "pulso": 0,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 12,
+     "detuneCents": 7,
+     "bioCutoffHz": 8723,
+     "reverbWet": 0.291,
+     "anthroGain": 0.019,
+     "velocity": 0.754
+    },
+    {
+     "year": 2015,
+     "value": 6207,
+     "vital": {
+      "vit": 50,
+      "div": 59.1,
+      "est": 81.3,
+      "pre": 22.1,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2048,
+      "arpegio": 4672,
+      "pulso": 0,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 13,
+     "detuneCents": 7,
+     "bioCutoffHz": 8248,
+     "reverbWet": 0.283,
+     "anthroGain": 0.027,
+     "velocity": 0.75
+    },
+    {
+     "year": 2016,
+     "value": 7893,
+     "vital": {
+      "vit": 49.2,
+      "div": 58.3,
+      "est": 78.4,
+      "pre": 26.7,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2048,
+      "arpegio": 4672,
+      "pulso": 0,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 15,
+     "detuneCents": 9,
+     "bioCutoffHz": 7629,
+     "reverbWet": 0.271,
+     "anthroGain": 0.039,
+     "velocity": 0.746
+    },
+    {
+     "year": 2017,
+     "value": 6947,
+     "vital": {
+      "vit": 48.4,
+      "div": 57.7,
+      "est": 80,
+      "pre": 24.1,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2048,
+      "arpegio": 4672,
+      "pulso": 0,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 14,
+     "detuneCents": 8,
+     "bioCutoffHz": 7973,
+     "reverbWet": 0.277,
+     "anthroGain": 0.032,
+     "velocity": 0.742
+    },
+    {
+     "year": 2018,
+     "value": 7536,
+     "vital": {
+      "vit": 47.6,
+      "div": 56.9,
+      "est": 79,
+      "pre": 25.7,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2048,
+      "arpegio": 4672,
+      "pulso": 0,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 15,
+     "detuneCents": 8,
+     "bioCutoffHz": 7760,
+     "reverbWet": 0.273,
+     "anthroGain": 0.036,
+     "velocity": 0.738
+    },
+    {
+     "year": 2019,
+     "value": 10129,
+     "vital": {
+      "vit": 46.5,
+      "div": 55.9,
+      "est": 74.6,
+      "pre": 32.9,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2048,
+      "arpegio": 4672,
+      "pulso": 0,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 18,
+     "detuneCents": 10,
+     "bioCutoffHz": 6867,
+     "reverbWet": 0.254,
+     "anthroGain": 0.06,
+     "velocity": 0.733
+    },
+    {
+     "year": 2020,
+     "value": 10851,
+     "vital": {
+      "vit": 45.3,
+      "div": 54.8,
+      "est": 73.3,
+      "pre": 34.9,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2048,
+      "arpegio": 4672,
+      "pulso": 0,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 19,
+     "detuneCents": 11,
+     "bioCutoffHz": 6638,
+     "reverbWet": 0.249,
+     "anthroGain": 0.067,
+     "velocity": 0.726
+    },
+    {
+     "year": 2021,
+     "value": 13038,
+     "vital": {
+      "vit": 43.9,
+      "div": 53.6,
+      "est": 69.6,
+      "pre": 40.9,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2048,
+      "arpegio": 4672,
+      "pulso": 0,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 21,
+     "detuneCents": 12,
+     "bioCutoffHz": 5996,
+     "reverbWet": 0.234,
+     "anthroGain": 0.092,
+     "velocity": 0.72
+    },
+    {
+     "year": 2022,
+     "value": 11594,
+     "vital": {
+      "vit": 42.7,
+      "div": 52.4,
+      "est": 72.1,
+      "pre": 36.9,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2048,
+      "arpegio": 4672,
+      "pulso": 0,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 20,
+     "detuneCents": 11,
+     "bioCutoffHz": 6417,
+     "reverbWet": 0.244,
+     "anthroGain": 0.075,
+     "velocity": 0.714
+    },
+    {
+     "year": 2023,
+     "value": 9064,
+     "vital": {
+      "vit": 41.7,
+      "div": 51.5,
+      "est": 76.4,
+      "pre": 30,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2048,
+      "arpegio": 4672,
+      "pulso": 0,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 17,
+     "detuneCents": 9,
+     "bioCutoffHz": 7214,
+     "reverbWet": 0.262,
+     "anthroGain": 0.05,
+     "velocity": 0.709
+    },
+    {
+     "year": 2024,
+     "value": 6288,
+     "vital": {
+      "vit": 41,
+      "div": 50.9,
+      "est": 81.2,
+      "pre": 22.3,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2048,
+      "arpegio": 4672,
+      "pulso": 0,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 13,
+     "detuneCents": 8,
+     "bioCutoffHz": 8220,
+     "reverbWet": 0.282,
+     "anthroGain": 0.027,
+     "velocity": 0.705
+    },
+    {
+     "year": 2025,
+     "value": 5731,
+     "vital": {
+      "vit": 40.4,
+      "div": 50.3,
+      "est": 82.1,
+      "pre": 20.8,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2048,
+      "arpegio": 4672,
+      "pulso": 0,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 13,
+     "detuneCents": 7,
+     "bioCutoffHz": 8432,
+     "reverbWet": 0.286,
+     "anthroGain": 0.024,
+     "velocity": 0.702
+    },
+    {
+     "year": 2026,
+     "value": 3335,
+     "vital": {
+      "vit": 40,
+      "div": 50,
+      "est": 86.3,
+      "pre": 14.2,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 2048,
+      "arpegio": 4672,
+      "pulso": 0,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 10,
+     "detuneCents": 5,
+     "bioCutoffHz": 9431,
+     "reverbWet": 0.303,
+     "anthroGain": 0.011,
+     "velocity": 0.7
+    }
+   ]
+  },
+  "hielo": {
+   "reference": {
+    "year": 0,
+    "value": 0,
+    "vital": {
+     "vit": 95,
+     "div": 100,
+     "est": 95,
+     "pre": 5,
+     "fever": 0
+    },
+    "masks": {
+     "bajo": 257,
+     "arpegio": 2080,
+     "pulso": 37444,
+     "canto": 1024
+    },
+    "scaleSize": 5,
+    "jitterMs": 4,
+    "detuneCents": 2,
+    "bioCutoffHz": 11024,
+    "reverbWet": 0.327,
+    "anthroGain": 0.001,
+    "velocity": 0.975
+   },
+   "label": "Hielo marino",
+   "signature": "hielo",
+   "unit": "millones de km² en septiembre",
+   "source": "NSIDC Sea Ice Index, Ártico",
+   "tempo": 52,
+   "years": [
+    {
+     "year": 1979,
+     "value": 7.05,
+     "vital": {
+      "vit": 92.7,
+      "div": 97.9,
+      "est": 93.8,
+      "pre": 7.9,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 2080,
+      "pulso": 37444,
+      "canto": 1024
+     },
+     "scaleSize": 5,
+     "jitterMs": 4,
+     "detuneCents": 2,
+     "bioCutoffHz": 10495,
+     "reverbWet": 0.319,
+     "anthroGain": 0.003,
+     "velocity": 0.964
+    },
+    {
+     "year": 1980,
+     "value": 7.67,
+     "vital": {
+      "vit": 95,
+      "div": 100,
+      "est": 80.5,
+      "pre": 5,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 2080,
+      "pulso": 37444,
+      "canto": 1024
+     },
+     "scaleSize": 5,
+     "jitterMs": 14,
+     "detuneCents": 8,
+     "bioCutoffHz": 11024,
+     "reverbWet": 0.327,
+     "anthroGain": 0.001,
+     "velocity": 0.975
+    },
+    {
+     "year": 1981,
+     "value": 7.14,
+     "vital": {
+      "vit": 94,
+      "div": 99.1,
+      "est": 82.1,
+      "pre": 6.3,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 2080,
+      "pulso": 37444,
+      "canto": 1024
+     },
+     "scaleSize": 5,
+     "jitterMs": 13,
+     "detuneCents": 7,
+     "bioCutoffHz": 10784,
+     "reverbWet": 0.324,
+     "anthroGain": 0.002,
+     "velocity": 0.97
+    },
+    {
+     "year": 1982,
+     "value": 7.3,
+     "vital": {
+      "vit": 95,
+      "div": 100,
+      "est": 91.3,
+      "pre": 5,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 2080,
+      "pulso": 37444,
+      "canto": 1024
+     },
+     "scaleSize": 5,
+     "jitterMs": 6,
+     "detuneCents": 3,
+     "bioCutoffHz": 11024,
+     "reverbWet": 0.327,
+     "anthroGain": 0.001,
+     "velocity": 0.975
+    },
+    {
+     "year": 1983,
+     "value": 7.39,
+     "vital": {
+      "vit": 95,
+      "div": 100,
+      "est": 92.9,
+      "pre": 5,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 2080,
+      "pulso": 37444,
+      "canto": 1024
+     },
+     "scaleSize": 5,
+     "jitterMs": 5,
+     "detuneCents": 3,
+     "bioCutoffHz": 11024,
+     "reverbWet": 0.327,
+     "anthroGain": 0.001,
+     "velocity": 0.975
+    },
+    {
+     "year": 1984,
+     "value": 6.81,
+     "vital": {
+      "vit": 89.3,
+      "div": 94.8,
+      "est": 78.6,
+      "pre": 12.2,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 2080,
+      "pulso": 36932,
+      "canto": 1024
+     },
+     "scaleSize": 5,
+     "jitterMs": 15,
+     "detuneCents": 9,
+     "bioCutoffHz": 9757,
+     "reverbWet": 0.308,
+     "anthroGain": 0.008,
+     "velocity": 0.947
+    },
+    {
+     "year": 1985,
+     "value": 6.7,
+     "vital": {
+      "vit": 87.7,
+      "div": 93.3,
+      "est": 88.8,
+      "pre": 14.1,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 2080,
+      "pulso": 36932,
+      "canto": 1024
+     },
+     "scaleSize": 5,
+     "jitterMs": 8,
+     "detuneCents": 4,
+     "bioCutoffHz": 9447,
+     "reverbWet": 0.303,
+     "anthroGain": 0.011,
+     "velocity": 0.939
+    },
+    {
+     "year": 1986,
+     "value": 7.41,
+     "vital": {
+      "vit": 95,
+      "div": 100,
+      "est": 78.4,
+      "pre": 5,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 2080,
+      "pulso": 37444,
+      "canto": 1024
+     },
+     "scaleSize": 5,
+     "jitterMs": 15,
+     "detuneCents": 9,
+     "bioCutoffHz": 11024,
+     "reverbWet": 0.327,
+     "anthroGain": 0.001,
+     "velocity": 0.975
+    },
+    {
+     "year": 1987,
+     "value": 7.28,
+     "vital": {
+      "vit": 95,
+      "div": 100,
+      "est": 92,
+      "pre": 5,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 2080,
+      "pulso": 37444,
+      "canto": 1024
+     },
+     "scaleSize": 5,
+     "jitterMs": 6,
+     "detuneCents": 3,
+     "bioCutoffHz": 11024,
+     "reverbWet": 0.327,
+     "anthroGain": 0.001,
+     "velocity": 0.975
+    },
+    {
+     "year": 1988,
+     "value": 7.37,
+     "vital": {
+      "vit": 95,
+      "div": 100,
+      "est": 92.9,
+      "pre": 5,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 2080,
+      "pulso": 37444,
+      "canto": 1024
+     },
+     "scaleSize": 5,
+     "jitterMs": 5,
+     "detuneCents": 3,
+     "bioCutoffHz": 11024,
+     "reverbWet": 0.327,
+     "anthroGain": 0.001,
+     "velocity": 0.975
+    },
+    {
+     "year": 1989,
+     "value": 7.01,
+     "vital": {
+      "vit": 92.1,
+      "div": 97.4,
+      "est": 85.2,
+      "pre": 8.6,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 2080,
+      "pulso": 37444,
+      "canto": 1024
+     },
+     "scaleSize": 5,
+     "jitterMs": 10,
+     "detuneCents": 6,
+     "bioCutoffHz": 10371,
+     "reverbWet": 0.318,
+     "anthroGain": 0.004,
+     "velocity": 0.96
+    },
+    {
+     "year": 1990,
+     "value": 6.14,
+     "vital": {
+      "vit": 79.7,
+      "div": 86,
+      "est": 67.1,
+      "pre": 24.1,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 2080,
+      "pulso": 36932,
+      "canto": 0
+     },
+     "scaleSize": 5,
+     "jitterMs": 23,
+     "detuneCents": 13,
+     "bioCutoffHz": 7973,
+     "reverbWet": 0.277,
+     "anthroGain": 0.032,
+     "velocity": 0.899
+    },
+    {
+     "year": 1991,
+     "value": 6.47,
+     "vital": {
+      "vit": 84.4,
+      "div": 90.3,
+      "est": 82,
+      "pre": 18.2,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 2080,
+      "pulso": 36932,
+      "canto": 1024
+     },
+     "scaleSize": 5,
+     "jitterMs": 13,
+     "detuneCents": 7,
+     "bioCutoffHz": 8812,
+     "reverbWet": 0.293,
+     "anthroGain": 0.018,
+     "velocity": 0.922
+    },
+    {
+     "year": 1992,
+     "value": 7.47,
+     "vital": {
+      "vit": 95,
+      "div": 100,
+      "est": 71.7,
+      "pre": 5,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 2080,
+      "pulso": 37444,
+      "canto": 1024
+     },
+     "scaleSize": 5,
+     "jitterMs": 20,
+     "detuneCents": 11,
+     "bioCutoffHz": 11024,
+     "reverbWet": 0.327,
+     "anthroGain": 0.001,
+     "velocity": 0.975
+    },
+    {
+     "year": 1993,
+     "value": 6.4,
+     "vital": {
+      "vit": 83.4,
+      "div": 89.4,
+      "est": 64.2,
+      "pre": 19.5,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 33808,
+      "pulso": 36932,
+      "canto": 512
+     },
+     "scaleSize": 5,
+     "jitterMs": 25,
+     "detuneCents": 14,
+     "bioCutoffHz": 8620,
+     "reverbWet": 0.289,
+     "anthroGain": 0.021,
+     "velocity": 0.917
+    },
+    {
+     "year": 1994,
+     "value": 7.14,
+     "vital": {
+      "vit": 94,
+      "div": 99.1,
+      "est": 77.2,
+      "pre": 6.3,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 2080,
+      "pulso": 37444,
+      "canto": 1024
+     },
+     "scaleSize": 5,
+     "jitterMs": 16,
+     "detuneCents": 9,
+     "bioCutoffHz": 10784,
+     "reverbWet": 0.324,
+     "anthroGain": 0.002,
+     "velocity": 0.97
+    },
+    {
+     "year": 1995,
+     "value": 6.08,
+     "vital": {
+      "vit": 78.9,
+      "div": 85.2,
+      "est": 62.2,
+      "pre": 25.2,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 33808,
+      "pulso": 36932,
+      "canto": 0
+     },
+     "scaleSize": 5,
+     "jitterMs": 26,
+     "detuneCents": 15,
+     "bioCutoffHz": 7826,
+     "reverbWet": 0.274,
+     "anthroGain": 0.035,
+     "velocity": 0.895
+    },
+    {
+     "year": 1996,
+     "value": 7.58,
+     "vital": {
+      "vit": 95,
+      "div": 100,
+      "est": 60,
+      "pre": 5,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 33808,
+      "pulso": 37444,
+      "canto": 256
+     },
+     "scaleSize": 5,
+     "jitterMs": 28,
+     "detuneCents": 16,
+     "bioCutoffHz": 11024,
+     "reverbWet": 0.327,
+     "anthroGain": 0.001,
+     "velocity": 0.975
+    },
+    {
+     "year": 1997,
+     "value": 6.69,
+     "vital": {
+      "vit": 87.6,
+      "div": 93.2,
+      "est": 70.5,
+      "pre": 14.3,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 2080,
+      "pulso": 36932,
+      "canto": 1024
+     },
+     "scaleSize": 5,
+     "jitterMs": 21,
+     "detuneCents": 12,
+     "bioCutoffHz": 9415,
+     "reverbWet": 0.303,
+     "anthroGain": 0.011,
+     "velocity": 0.938
+    },
+    {
+     "year": 1998,
+     "value": 6.54,
+     "vital": {
+      "vit": 85.4,
+      "div": 91.2,
+      "est": 86.7,
+      "pre": 17,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 2080,
+      "pulso": 36932,
+      "canto": 1024
+     },
+     "scaleSize": 5,
+     "jitterMs": 9,
+     "detuneCents": 5,
+     "bioCutoffHz": 8994,
+     "reverbWet": 0.296,
+     "anthroGain": 0.016,
+     "velocity": 0.927
+    },
+    {
+     "year": 1999,
+     "value": 6.12,
+     "vital": {
+      "vit": 79.4,
+      "div": 85.7,
+      "est": 77.4,
+      "pre": 24.4,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 2080,
+      "pulso": 36932,
+      "canto": 0
+     },
+     "scaleSize": 5,
+     "jitterMs": 16,
+     "detuneCents": 9,
+     "bioCutoffHz": 7933,
+     "reverbWet": 0.277,
+     "anthroGain": 0.033,
+     "velocity": 0.897
+    },
+    {
+     "year": 2000,
+     "value": 6.25,
+     "vital": {
+      "vit": 81.3,
+      "div": 87.4,
+      "est": 85.1,
+      "pre": 22.1,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 2080,
+      "pulso": 36932,
+      "canto": 0
+     },
+     "scaleSize": 5,
+     "jitterMs": 10,
+     "detuneCents": 6,
+     "bioCutoffHz": 8248,
+     "reverbWet": 0.283,
+     "anthroGain": 0.027,
+     "velocity": 0.907
+    },
+    {
+     "year": 2001,
+     "value": 6.73,
+     "vital": {
+      "vit": 88.1,
+      "div": 93.7,
+      "est": 80.4,
+      "pre": 13.6,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 2080,
+      "pulso": 36932,
+      "canto": 1024
+     },
+     "scaleSize": 5,
+     "jitterMs": 14,
+     "detuneCents": 8,
+     "bioCutoffHz": 9528,
+     "reverbWet": 0.305,
+     "anthroGain": 0.01,
+     "velocity": 0.94
+    },
+    {
+     "year": 2002,
+     "value": 5.83,
+     "vital": {
+      "vit": 75.3,
+      "div": 82,
+      "est": 64.2,
+      "pre": 29.6,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 33808,
+      "pulso": 36932,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 25,
+     "detuneCents": 14,
+     "bioCutoffHz": 7263,
+     "reverbWet": 0.263,
+     "anthroGain": 0.048,
+     "velocity": 0.877
+    },
+    {
+     "year": 2003,
+     "value": 6.12,
+     "vital": {
+      "vit": 79.4,
+      "div": 85.7,
+      "est": 80.5,
+      "pre": 24.4,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 2080,
+      "pulso": 36932,
+      "canto": 0
+     },
+     "scaleSize": 5,
+     "jitterMs": 14,
+     "detuneCents": 8,
+     "bioCutoffHz": 7933,
+     "reverbWet": 0.277,
+     "anthroGain": 0.033,
+     "velocity": 0.897
+    },
+    {
+     "year": 2004,
+     "value": 5.98,
+     "vital": {
+      "vit": 77.5,
+      "div": 83.9,
+      "est": 83,
+      "pre": 26.9,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 2080,
+      "pulso": 36932,
+      "canto": 0
+     },
+     "scaleSize": 5,
+     "jitterMs": 12,
+     "detuneCents": 7,
+     "bioCutoffHz": 7603,
+     "reverbWet": 0.27,
+     "anthroGain": 0.04,
+     "velocity": 0.888
+    },
+    {
+     "year": 2005,
+     "value": 5.5,
+     "vital": {
+      "vit": 70.6,
+      "div": 77.6,
+      "est": 71.6,
+      "pre": 35.5,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 2080,
+      "pulso": 36932,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 20,
+     "detuneCents": 11,
+     "bioCutoffHz": 6571,
+     "reverbWet": 0.248,
+     "anthroGain": 0.069,
+     "velocity": 0.853
+    },
+    {
+     "year": 2006,
+     "value": 5.86,
+     "vital": {
+      "vit": 75.7,
+      "div": 82.3,
+      "est": 77,
+      "pre": 29.1,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 2080,
+      "pulso": 36932,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 16,
+     "detuneCents": 9,
+     "bioCutoffHz": 7325,
+     "reverbWet": 0.264,
+     "anthroGain": 0.047,
+     "velocity": 0.879
+    },
+    {
+     "year": 2007,
+     "value": 4.27,
+     "vital": {
+      "vit": 53.1,
+      "div": 61.6,
+      "est": 39,
+      "pre": 57.4,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 256,
+      "pulso": 0,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 43,
+     "detuneCents": 24,
+     "bioCutoffHz": 4532,
+     "reverbWet": 0.191,
+     "anthroGain": 0.181,
+     "velocity": 0.766
+    },
+    {
+     "year": 2008,
+     "value": 4.69,
+     "vital": {
+      "vit": 59.1,
+      "div": 67.1,
+      "est": 67.2,
+      "pre": 49.9,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 2080,
+      "pulso": 36932,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 23,
+     "detuneCents": 13,
+     "bioCutoffHz": 5147,
+     "reverbWet": 0.21,
+     "anthroGain": 0.137,
+     "velocity": 0.796
+    },
+    {
+     "year": 2009,
+     "value": 5.26,
+     "vital": {
+      "vit": 67.2,
+      "div": 74.5,
+      "est": 67.8,
+      "pre": 39.8,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 2080,
+      "pulso": 36932,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 23,
+     "detuneCents": 13,
+     "bioCutoffHz": 6109,
+     "reverbWet": 0.237,
+     "anthroGain": 0.087,
+     "velocity": 0.836
+    },
+    {
+     "year": 2010,
+     "value": 4.87,
+     "vital": {
+      "vit": 61.6,
+      "div": 69.4,
+      "est": 69.2,
+      "pre": 46.7,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 2080,
+      "pulso": 36932,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 22,
+     "detuneCents": 12,
+     "bioCutoffHz": 5434,
+     "reverbWet": 0.219,
+     "anthroGain": 0.12,
+     "velocity": 0.808
+    },
+    {
+     "year": 2011,
+     "value": 4.56,
+     "vital": {
+      "vit": 57.2,
+      "div": 65.4,
+      "est": 68.9,
+      "pre": 52.2,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 2048,
+      "pulso": 36932,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 22,
+     "detuneCents": 12,
+     "bioCutoffHz": 4950,
+     "reverbWet": 0.204,
+     "anthroGain": 0.15,
+     "velocity": 0.786
+    },
+    {
+     "year": 2012,
+     "value": 3.57,
+     "vital": {
+      "vit": 43.1,
+      "div": 52.4,
+      "est": 46,
+      "pre": 69.9,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 520,
+      "pulso": 0,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 38,
+     "detuneCents": 22,
+     "bioCutoffHz": 3666,
+     "reverbWet": 0.158,
+     "anthroGain": 0.269,
+     "velocity": 0.716
+    },
+    {
+     "year": 2013,
+     "value": 5.21,
+     "vital": {
+      "vit": 66.5,
+      "div": 73.9,
+      "est": 45.7,
+      "pre": 40.6,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 16904,
+      "pulso": 18722,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 38,
+     "detuneCents": 22,
+     "bioCutoffHz": 6026,
+     "reverbWet": 0.234,
+     "anthroGain": 0.091,
+     "velocity": 0.833
+    },
+    {
+     "year": 2014,
+     "value": 5.22,
+     "vital": {
+      "vit": 66.6,
+      "div": 74,
+      "est": 80.6,
+      "pre": 40.5,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 2080,
+      "pulso": 36932,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 14,
+     "detuneCents": 8,
+     "bioCutoffHz": 6037,
+     "reverbWet": 0.235,
+     "anthroGain": 0.09,
+     "velocity": 0.833
+    },
+    {
+     "year": 2015,
+     "value": 4.62,
+     "vital": {
+      "vit": 58.1,
+      "div": 66.2,
+      "est": 62.5,
+      "pre": 51.2,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 1040,
+      "pulso": 36932,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 26,
+     "detuneCents": 15,
+     "bioCutoffHz": 5035,
+     "reverbWet": 0.207,
+     "anthroGain": 0.144,
+     "velocity": 0.791
+    },
+    {
+     "year": 2016,
+     "value": 4.53,
+     "vital": {
+      "vit": 56.8,
+      "div": 65,
+      "est": 73.8,
+      "pre": 52.8,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 2048,
+      "pulso": 36932,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 18,
+     "detuneCents": 10,
+     "bioCutoffHz": 4900,
+     "reverbWet": 0.203,
+     "anthroGain": 0.153,
+     "velocity": 0.784
+    },
+    {
+     "year": 2017,
+     "value": 4.82,
+     "vital": {
+      "vit": 60.9,
+      "div": 68.8,
+      "est": 71.2,
+      "pre": 47.6,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 2080,
+      "pulso": 36932,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 20,
+     "detuneCents": 12,
+     "bioCutoffHz": 5352,
+     "reverbWet": 0.216,
+     "anthroGain": 0.125,
+     "velocity": 0.805
+    },
+    {
+     "year": 2018,
+     "value": 4.79,
+     "vital": {
+      "vit": 60.5,
+      "div": 68.4,
+      "est": 77,
+      "pre": 48.1,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 2080,
+      "pulso": 36932,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 16,
+     "detuneCents": 9,
+     "bioCutoffHz": 5306,
+     "reverbWet": 0.215,
+     "anthroGain": 0.127,
+     "velocity": 0.803
+    },
+    {
+     "year": 2019,
+     "value": 4.32,
+     "vital": {
+      "vit": 53.8,
+      "div": 62.2,
+      "est": 63.4,
+      "pre": 56.5,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 1040,
+      "pulso": 0,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 26,
+     "detuneCents": 15,
+     "bioCutoffHz": 4602,
+     "reverbWet": 0.193,
+     "anthroGain": 0.176,
+     "velocity": 0.769
+    },
+    {
+     "year": 2020,
+     "value": 3.92,
+     "vital": {
+      "vit": 48.1,
+      "div": 57,
+      "est": 62.2,
+      "pre": 63.6,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 1040,
+      "pulso": 0,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 26,
+     "detuneCents": 15,
+     "bioCutoffHz": 4079,
+     "reverbWet": 0.175,
+     "anthroGain": 0.222,
+     "velocity": 0.741
+    },
+    {
+     "year": 2021,
+     "value": 4.92,
+     "vital": {
+      "vit": 62.4,
+      "div": 70.1,
+      "est": 55.3,
+      "pre": 45.8,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 1040,
+      "pulso": 18722,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 31,
+     "detuneCents": 18,
+     "bioCutoffHz": 5518,
+     "reverbWet": 0.221,
+     "anthroGain": 0.115,
+     "velocity": 0.812
+    },
+    {
+     "year": 2022,
+     "value": 4.87,
+     "vital": {
+      "vit": 61.6,
+      "div": 69.4,
+      "est": 77.2,
+      "pre": 46.7,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 2080,
+      "pulso": 36932,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 16,
+     "detuneCents": 9,
+     "bioCutoffHz": 5434,
+     "reverbWet": 0.219,
+     "anthroGain": 0.12,
+     "velocity": 0.808
+    },
+    {
+     "year": 2023,
+     "value": 4.37,
+     "vital": {
+      "vit": 54.5,
+      "div": 62.9,
+      "est": 63.1,
+      "pre": 55.6,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 1040,
+      "pulso": 36932,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 26,
+     "detuneCents": 15,
+     "bioCutoffHz": 4672,
+     "reverbWet": 0.195,
+     "anthroGain": 0.17,
+     "velocity": 0.773
+    },
+    {
+     "year": 2024,
+     "value": 4.38,
+     "vital": {
+      "vit": 54.7,
+      "div": 63,
+      "est": 74.6,
+      "pre": 55.4,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 2048,
+      "pulso": 36932,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 18,
+     "detuneCents": 10,
+     "bioCutoffHz": 4688,
+     "reverbWet": 0.196,
+     "anthroGain": 0.169,
+     "velocity": 0.774
+    },
+    {
+     "year": 2025,
+     "value": 4.75,
+     "vital": {
+      "vit": 59.9,
+      "div": 67.9,
+      "est": 68.8,
+      "pre": 48.8,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 2080,
+      "pulso": 36932,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 22,
+     "detuneCents": 12,
+     "bioCutoffHz": 5244,
+     "reverbWet": 0.213,
+     "anthroGain": 0.131,
+     "velocity": 0.8
+    }
+   ]
+  },
+  "gases": {
+   "reference": {
+    "year": 0,
+    "value": 0,
+    "vital": {
+     "vit": 95,
+     "div": 100,
+     "est": 95,
+     "pre": 5,
+     "fever": 0
+    },
+    "masks": {
+     "bajo": 257,
+     "arpegio": 21844,
+     "pulso": 43346,
+     "canto": 4096
+    },
+    "scaleSize": 5,
+    "jitterMs": 4,
+    "detuneCents": 2,
+    "bioCutoffHz": 11024,
+    "reverbWet": 0.327,
+    "anthroGain": 0.001,
+    "velocity": 0.975
+   },
+   "label": "Gases de efecto invernadero",
+   "signature": "gases",
+   "unit": "ppm de CO₂ en Mauna Loa",
+   "source": "NOAA Global Monitoring Laboratory",
+   "tempo": 60,
+   "years": [
+    {
+     "year": 1959,
+     "value": 315.98,
+     "vital": {
+      "vit": 95,
+      "div": 100,
+      "est": 95,
+      "pre": 24.8,
+      "fever": 0
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21844,
+      "pulso": 43346,
+      "canto": 4096
+     },
+     "scaleSize": 5,
+     "jitterMs": 4,
+     "detuneCents": 2,
+     "bioCutoffHz": 7879,
+     "reverbWet": 0.276,
+     "anthroGain": 0.034,
+     "velocity": 0.975
+    },
+    {
+     "year": 1960,
+     "value": 316.91,
+     "vital": {
+      "vit": 94.6,
+      "div": 99.6,
+      "est": 94.7,
+      "pre": 24.8,
+      "fever": 0.4
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21844,
+      "pulso": 43346,
+      "canto": 4096
+     },
+     "scaleSize": 5,
+     "jitterMs": 4,
+     "detuneCents": 2,
+     "bioCutoffHz": 7879,
+     "reverbWet": 0.276,
+     "anthroGain": 0.034,
+     "velocity": 0.973
+    },
+    {
+     "year": 1961,
+     "value": 317.64,
+     "vital": {
+      "vit": 94.3,
+      "div": 99.3,
+      "est": 91.8,
+      "pre": 20.5,
+      "fever": 0.7
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21844,
+      "pulso": 43346,
+      "canto": 4096
+     },
+     "scaleSize": 5,
+     "jitterMs": 6,
+     "detuneCents": 3,
+     "bioCutoffHz": 8475,
+     "reverbWet": 0.287,
+     "anthroGain": 0.023,
+     "velocity": 0.972
+    },
+    {
+     "year": 1962,
+     "value": 318.45,
+     "vital": {
+      "vit": 94,
+      "div": 99,
+      "est": 93.2,
+      "pre": 22.2,
+      "fever": 1.1
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21844,
+      "pulso": 43346,
+      "canto": 4096
+     },
+     "scaleSize": 5,
+     "jitterMs": 5,
+     "detuneCents": 3,
+     "bioCutoffHz": 8234,
+     "reverbWet": 0.282,
+     "anthroGain": 0.027,
+     "velocity": 0.97
+    },
+    {
+     "year": 1963,
+     "value": 318.99,
+     "vital": {
+      "vit": 93.8,
+      "div": 98.8,
+      "est": 90.5,
+      "pre": 16.5,
+      "fever": 1.4
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21844,
+      "pulso": 43346,
+      "canto": 4096
+     },
+     "scaleSize": 5,
+     "jitterMs": 7,
+     "detuneCents": 4,
+     "bioCutoffHz": 9070,
+     "reverbWet": 0.297,
+     "anthroGain": 0.015,
+     "velocity": 0.969
+    },
+    {
+     "year": 1964,
+     "value": 319.62,
+     "vital": {
+      "vit": 93.5,
+      "div": 98.5,
+      "est": 92.7,
+      "pre": 18.4,
+      "fever": 1.6
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21844,
+      "pulso": 43346,
+      "canto": 4096
+     },
+     "scaleSize": 5,
+     "jitterMs": 5,
+     "detuneCents": 3,
+     "bioCutoffHz": 8782,
+     "reverbWet": 0.292,
+     "anthroGain": 0.019,
+     "velocity": 0.968
+    },
+    {
+     "year": 1965,
+     "value": 320.04,
+     "vital": {
+      "vit": 93.4,
+      "div": 98.4,
+      "est": 90.9,
+      "pre": 13.9,
+      "fever": 1.8
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21844,
+      "pulso": 43346,
+      "canto": 4096
+     },
+     "scaleSize": 5,
+     "jitterMs": 6,
+     "detuneCents": 4,
+     "bioCutoffHz": 9479,
+     "reverbWet": 0.304,
+     "anthroGain": 0.011,
+     "velocity": 0.967
+    },
+    {
+     "year": 1966,
+     "value": 321.37,
+     "vital": {
+      "vit": 92.8,
+      "div": 97.8,
+      "est": 81.2,
+      "pre": 33.3,
+      "fever": 2.4
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21844,
+      "pulso": 43346,
+      "canto": 4096
+     },
+     "scaleSize": 5,
+     "jitterMs": 13,
+     "detuneCents": 8,
+     "bioCutoffHz": 6821,
+     "reverbWet": 0.253,
+     "anthroGain": 0.061,
+     "velocity": 0.964
+    },
+    {
+     "year": 1967,
+     "value": 322.18,
+     "vital": {
+      "vit": 92.5,
+      "div": 97.5,
+      "est": 86.1,
+      "pre": 22.2,
+      "fever": 2.8
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21844,
+      "pulso": 43346,
+      "canto": 4096
+     },
+     "scaleSize": 5,
+     "jitterMs": 10,
+     "detuneCents": 6,
+     "bioCutoffHz": 8234,
+     "reverbWet": 0.282,
+     "anthroGain": 0.027,
+     "velocity": 0.963
+    },
+    {
+     "year": 1968,
+     "value": 323.05,
+     "vital": {
+      "vit": 92.1,
+      "div": 97.1,
+      "est": 92,
+      "pre": 23.5,
+      "fever": 3.2
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21844,
+      "pulso": 43346,
+      "canto": 4096
+     },
+     "scaleSize": 5,
+     "jitterMs": 6,
+     "detuneCents": 3,
+     "bioCutoffHz": 8055,
+     "reverbWet": 0.279,
+     "anthroGain": 0.03,
+     "velocity": 0.96
+    },
+    {
+     "year": 1969,
+     "value": 324.62,
+     "vital": {
+      "vit": 91.5,
+      "div": 96.5,
+      "est": 83,
+      "pre": 38.4,
+      "fever": 3.9
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 4096
+     },
+     "scaleSize": 5,
+     "jitterMs": 12,
+     "detuneCents": 7,
+     "bioCutoffHz": 6256,
+     "reverbWet": 0.24,
+     "anthroGain": 0.081,
+     "velocity": 0.958
+    },
+    {
+     "year": 1970,
+     "value": 325.68,
+     "vital": {
+      "vit": 91.1,
+      "div": 96.1,
+      "est": 85.2,
+      "pre": 27.5,
+      "fever": 4.4
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 4096
+     },
+     "scaleSize": 5,
+     "jitterMs": 10,
+     "detuneCents": 6,
+     "bioCutoffHz": 7526,
+     "reverbWet": 0.269,
+     "anthroGain": 0.042,
+     "velocity": 0.956
+    },
+    {
+     "year": 1971,
+     "value": 326.32,
+     "vital": {
+      "vit": 90.8,
+      "div": 95.8,
+      "est": 86.2,
+      "pre": 18.6,
+      "fever": 4.6
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 4096
+     },
+     "scaleSize": 5,
+     "jitterMs": 10,
+     "detuneCents": 6,
+     "bioCutoffHz": 8753,
+     "reverbWet": 0.292,
+     "anthroGain": 0.019,
+     "velocity": 0.954
+    },
+    {
+     "year": 1972,
+     "value": 327.46,
+     "vital": {
+      "vit": 90.4,
+      "div": 95.4,
+      "est": 84.7,
+      "pre": 29.2,
+      "fever": 5.2
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 4096
+     },
+     "scaleSize": 5,
+     "jitterMs": 11,
+     "detuneCents": 6,
+     "bioCutoffHz": 7312,
+     "reverbWet": 0.264,
+     "anthroGain": 0.047,
+     "velocity": 0.952
+    },
+    {
+     "year": 1973,
+     "value": 329.68,
+     "vital": {
+      "vit": 89.5,
+      "div": 94.5,
+      "est": 76.3,
+      "pre": 52.2,
+      "fever": 6.2
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 4096
+     },
+     "scaleSize": 5,
+     "jitterMs": 17,
+     "detuneCents": 9,
+     "bioCutoffHz": 4950,
+     "reverbWet": 0.204,
+     "anthroGain": 0.15,
+     "velocity": 0.948
+    },
+    {
+     "year": 1974,
+     "value": 330.19,
+     "vital": {
+      "vit": 89.3,
+      "div": 94.3,
+      "est": 70.5,
+      "pre": 15.8,
+      "fever": 6.4
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 4096
+     },
+     "scaleSize": 5,
+     "jitterMs": 21,
+     "detuneCents": 12,
+     "bioCutoffHz": 9179,
+     "reverbWet": 0.299,
+     "anthroGain": 0.014,
+     "velocity": 0.947
+    },
+    {
+     "year": 1975,
+     "value": 331.13,
+     "vital": {
+      "vit": 88.9,
+      "div": 93.9,
+      "est": 84.5,
+      "pre": 25,
+      "fever": 6.8
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 4096
+     },
+     "scaleSize": 5,
+     "jitterMs": 11,
+     "detuneCents": 6,
+     "bioCutoffHz": 7852,
+     "reverbWet": 0.275,
+     "anthroGain": 0.034,
+     "velocity": 0.945
+    },
+    {
+     "year": 1976,
+     "value": 332.03,
+     "vital": {
+      "vit": 88.5,
+      "div": 93.5,
+      "est": 89.4,
+      "pre": 24.1,
+      "fever": 7.2
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 4096
+     },
+     "scaleSize": 5,
+     "jitterMs": 7,
+     "detuneCents": 4,
+     "bioCutoffHz": 7973,
+     "reverbWet": 0.277,
+     "anthroGain": 0.032,
+     "velocity": 0.943
+    },
+    {
+     "year": 1977,
+     "value": 333.84,
+     "vital": {
+      "vit": 87.8,
+      "div": 92.8,
+      "est": 77.3,
+      "pre": 43.5,
+      "fever": 8
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 4096
+     },
+     "scaleSize": 5,
+     "jitterMs": 16,
+     "detuneCents": 9,
+     "bioCutoffHz": 5737,
+     "reverbWet": 0.227,
+     "anthroGain": 0.104,
+     "velocity": 0.939
+    },
+    {
+     "year": 1978,
+     "value": 335.41,
+     "vital": {
+      "vit": 87.1,
+      "div": 92.1,
+      "est": 85.7,
+      "pre": 38.4,
+      "fever": 8.7
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 4096
+     },
+     "scaleSize": 5,
+     "jitterMs": 10,
+     "detuneCents": 6,
+     "bioCutoffHz": 6256,
+     "reverbWet": 0.24,
+     "anthroGain": 0.081,
+     "velocity": 0.936
+    },
+    {
+     "year": 1979,
+     "value": 336.84,
+     "vital": {
+      "vit": 86.6,
+      "div": 91.6,
+      "est": 86.6,
+      "pre": 35.4,
+      "fever": 9.4
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 4096
+     },
+     "scaleSize": 5,
+     "jitterMs": 9,
+     "detuneCents": 5,
+     "bioCutoffHz": 6582,
+     "reverbWet": 0.248,
+     "anthroGain": 0.069,
+     "velocity": 0.933
+    },
+    {
+     "year": 1980,
+     "value": 338.76,
+     "vital": {
+      "vit": 85.8,
+      "div": 90.8,
+      "est": 81.3,
+      "pre": 45.8,
+      "fever": 10.2
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 4096
+     },
+     "scaleSize": 5,
+     "jitterMs": 13,
+     "detuneCents": 7,
+     "bioCutoffHz": 5518,
+     "reverbWet": 0.221,
+     "anthroGain": 0.115,
+     "velocity": 0.929
+    },
+    {
+     "year": 1981,
+     "value": 340.12,
+     "vital": {
+      "vit": 85.2,
+      "div": 90.2,
+      "est": 79.9,
+      "pre": 33.9,
+      "fever": 10.8
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 4096
+     },
+     "scaleSize": 5,
+     "jitterMs": 14,
+     "detuneCents": 8,
+     "bioCutoffHz": 6752,
+     "reverbWet": 0.252,
+     "anthroGain": 0.063,
+     "velocity": 0.926
+    },
+    {
+     "year": 1982,
+     "value": 341.48,
+     "vital": {
+      "vit": 84.7,
+      "div": 89.7,
+      "est": 87,
+      "pre": 33.9,
+      "fever": 11.4
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 4096
+     },
+     "scaleSize": 5,
+     "jitterMs": 9,
+     "detuneCents": 5,
+     "bioCutoffHz": 6752,
+     "reverbWet": 0.252,
+     "anthroGain": 0.063,
+     "velocity": 0.924
+    },
+    {
+     "year": 1983,
+     "value": 343.15,
+     "vital": {
+      "vit": 84,
+      "div": 89,
+      "est": 82.3,
+      "pre": 40.5,
+      "fever": 12.2
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 4096
+     },
+     "scaleSize": 5,
+     "jitterMs": 12,
+     "detuneCents": 7,
+     "bioCutoffHz": 6037,
+     "reverbWet": 0.235,
+     "anthroGain": 0.09,
+     "velocity": 0.92
+    },
+    {
+     "year": 1984,
+     "value": 344.87,
+     "vital": {
+      "vit": 83.3,
+      "div": 88.3,
+      "est": 85.3,
+      "pre": 41.5,
+      "fever": 13
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 4096
+     },
+     "scaleSize": 5,
+     "jitterMs": 10,
+     "detuneCents": 6,
+     "bioCutoffHz": 5935,
+     "reverbWet": 0.232,
+     "anthroGain": 0.095,
+     "velocity": 0.917
+    },
+    {
+     "year": 1985,
+     "value": 346.35,
+     "vital": {
+      "vit": 82.7,
+      "div": 87.7,
+      "est": 82.3,
+      "pre": 36.4,
+      "fever": 13.6
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 4096
+     },
+     "scaleSize": 5,
+     "jitterMs": 12,
+     "detuneCents": 7,
+     "bioCutoffHz": 6471,
+     "reverbWet": 0.245,
+     "anthroGain": 0.073,
+     "velocity": 0.914
+    },
+    {
+     "year": 1986,
+     "value": 347.61,
+     "vital": {
+      "vit": 82.2,
+      "div": 87.2,
+      "est": 82.1,
+      "pre": 31.8,
+      "fever": 14.2
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 5,
+     "jitterMs": 13,
+     "detuneCents": 7,
+     "bioCutoffHz": 6997,
+     "reverbWet": 0.257,
+     "anthroGain": 0.056,
+     "velocity": 0.911
+    },
+    {
+     "year": 1987,
+     "value": 349.31,
+     "vital": {
+      "vit": 81.5,
+      "div": 86.5,
+      "est": 78.7,
+      "pre": 41.1,
+      "fever": 15
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 5,
+     "jitterMs": 15,
+     "detuneCents": 9,
+     "bioCutoffHz": 5975,
+     "reverbWet": 0.233,
+     "anthroGain": 0.093,
+     "velocity": 0.908
+    },
+    {
+     "year": 1988,
+     "value": 351.69,
+     "vital": {
+      "vit": 80.6,
+      "div": 85.6,
+      "est": 74.7,
+      "pre": 55.6,
+      "fever": 16
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 5,
+     "jitterMs": 18,
+     "detuneCents": 10,
+     "bioCutoffHz": 4672,
+     "reverbWet": 0.195,
+     "anthroGain": 0.17,
+     "velocity": 0.903
+    },
+    {
+     "year": 1989,
+     "value": 353.2,
+     "vital": {
+      "vit": 80,
+      "div": 85,
+      "est": 71.7,
+      "pre": 37.1,
+      "fever": 16.7
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 5,
+     "jitterMs": 20,
+     "detuneCents": 11,
+     "bioCutoffHz": 6395,
+     "reverbWet": 0.244,
+     "anthroGain": 0.076,
+     "velocity": 0.9
+    },
+    {
+     "year": 1990,
+     "value": 354.45,
+     "vital": {
+      "vit": 79.5,
+      "div": 84.5,
+      "est": 79.4,
+      "pre": 31.6,
+      "fever": 17.3
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 5,
+     "jitterMs": 14,
+     "detuneCents": 8,
+     "bioCutoffHz": 7020,
+     "reverbWet": 0.258,
+     "anthroGain": 0.055,
+     "velocity": 0.898
+    },
+    {
+     "year": 1991,
+     "value": 355.7,
+     "vital": {
+      "vit": 79,
+      "div": 84,
+      "est": 82.5,
+      "pre": 31.6,
+      "fever": 17.8
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 5,
+     "jitterMs": 12,
+     "detuneCents": 7,
+     "bioCutoffHz": 7020,
+     "reverbWet": 0.258,
+     "anthroGain": 0.055,
+     "velocity": 0.895
+    },
+    {
+     "year": 1992,
+     "value": 356.54,
+     "vital": {
+      "vit": 78.6,
+      "div": 83.6,
+      "est": 76.8,
+      "pre": 22.8,
+      "fever": 18.2
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 5,
+     "jitterMs": 16,
+     "detuneCents": 9,
+     "bioCutoffHz": 8151,
+     "reverbWet": 0.281,
+     "anthroGain": 0.029,
+     "velocity": 0.893
+    },
+    {
+     "year": 1993,
+     "value": 357.21,
+     "vital": {
+      "vit": 78.3,
+      "div": 83.3,
+      "est": 79.8,
+      "pre": 19.2,
+      "fever": 18.5
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 14,
+     "detuneCents": 8,
+     "bioCutoffHz": 8664,
+     "reverbWet": 0.29,
+     "anthroGain": 0.02,
+     "velocity": 0.892
+    },
+    {
+     "year": 1994,
+     "value": 358.96,
+     "vital": {
+      "vit": 77.6,
+      "div": 82.6,
+      "est": 67.1,
+      "pre": 42.2,
+      "fever": 19.3
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 23,
+     "detuneCents": 13,
+     "bioCutoffHz": 5865,
+     "reverbWet": 0.23,
+     "anthroGain": 0.098,
+     "velocity": 0.888
+    },
+    {
+     "year": 1995,
+     "value": 360.97,
+     "vital": {
+      "vit": 76.8,
+      "div": 81.8,
+      "est": 77.4,
+      "pre": 47.7,
+      "fever": 20.2
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 16,
+     "detuneCents": 9,
+     "bioCutoffHz": 5343,
+     "reverbWet": 0.216,
+     "anthroGain": 0.125,
+     "velocity": 0.884
+    },
+    {
+     "year": 1996,
+     "value": 362.74,
+     "vital": {
+      "vit": 76.1,
+      "div": 81.1,
+      "est": 77.1,
+      "pre": 42.6,
+      "fever": 21
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 16,
+     "detuneCents": 9,
+     "bioCutoffHz": 5825,
+     "reverbWet": 0.229,
+     "anthroGain": 0.1,
+     "velocity": 0.881
+    },
+    {
+     "year": 1997,
+     "value": 363.88,
+     "vital": {
+      "vit": 75.6,
+      "div": 80.6,
+      "est": 71.5,
+      "pre": 29.2,
+      "fever": 21.5
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 20,
+     "detuneCents": 11,
+     "bioCutoffHz": 7312,
+     "reverbWet": 0.264,
+     "anthroGain": 0.047,
+     "velocity": 0.878
+    },
+    {
+     "year": 1998,
+     "value": 366.84,
+     "vital": {
+      "vit": 74.4,
+      "div": 79.4,
+      "est": 59,
+      "pre": 67.9,
+      "fever": 22.8
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 29,
+     "detuneCents": 16,
+     "bioCutoffHz": 3792,
+     "reverbWet": 0.163,
+     "anthroGain": 0.254,
+     "velocity": 0.872
+    },
+    {
+     "year": 1999,
+     "value": 368.54,
+     "vital": {
+      "vit": 73.8,
+      "div": 78.8,
+      "est": 61.7,
+      "pre": 41.1,
+      "fever": 23.6
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 27,
+     "detuneCents": 15,
+     "bioCutoffHz": 5975,
+     "reverbWet": 0.233,
+     "anthroGain": 0.093,
+     "velocity": 0.869
+    },
+    {
+     "year": 2000,
+     "value": 369.71,
+     "vital": {
+      "vit": 73.3,
+      "div": 78.3,
+      "est": 71,
+      "pre": 29.9,
+      "fever": 24.1
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 20,
+     "detuneCents": 12,
+     "bioCutoffHz": 7226,
+     "reverbWet": 0.262,
+     "anthroGain": 0.049,
+     "velocity": 0.867
+    },
+    {
+     "year": 2001,
+     "value": 371.32,
+     "vital": {
+      "vit": 72.6,
+      "div": 77.6,
+      "est": 71.7,
+      "pre": 39.2,
+      "fever": 24.8
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 20,
+     "detuneCents": 11,
+     "bioCutoffHz": 6171,
+     "reverbWet": 0.238,
+     "anthroGain": 0.085,
+     "velocity": 0.863
+    },
+    {
+     "year": 2002,
+     "value": 373.45,
+     "vital": {
+      "vit": 71.8,
+      "div": 76.8,
+      "est": 70,
+      "pre": 50.3,
+      "fever": 25.8
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 21,
+     "detuneCents": 12,
+     "bioCutoffHz": 5112,
+     "reverbWet": 0.209,
+     "anthroGain": 0.139,
+     "velocity": 0.859
+    },
+    {
+     "year": 2003,
+     "value": 375.98,
+     "vital": {
+      "vit": 70.8,
+      "div": 75.8,
+      "est": 70.8,
+      "pre": 58.8,
+      "fever": 26.9
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 20,
+     "detuneCents": 12,
+     "bioCutoffHz": 4426,
+     "reverbWet": 0.187,
+     "anthroGain": 0.19,
+     "velocity": 0.854
+    },
+    {
+     "year": 2004,
+     "value": 377.7,
+     "vital": {
+      "vit": 70.1,
+      "div": 75.1,
+      "est": 64.8,
+      "pre": 41.5,
+      "fever": 27.7
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 25,
+     "detuneCents": 14,
+     "bioCutoffHz": 5935,
+     "reverbWet": 0.232,
+     "anthroGain": 0.095,
+     "velocity": 0.851
+    },
+    {
+     "year": 2005,
+     "value": 379.98,
+     "vital": {
+      "vit": 69.1,
+      "div": 74.1,
+      "est": 67.4,
+      "pre": 53.4,
+      "fever": 28.7
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 23,
+     "detuneCents": 13,
+     "bioCutoffHz": 4850,
+     "reverbWet": 0.201,
+     "anthroGain": 0.157,
+     "velocity": 0.845
+    },
+    {
+     "year": 2006,
+     "value": 382.09,
+     "vital": {
+      "vit": 68.3,
+      "div": 73.3,
+      "est": 72,
+      "pre": 49.8,
+      "fever": 29.7
+     },
+     "masks": {
+      "bajo": 257,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 20,
+     "detuneCents": 11,
+     "bioCutoffHz": 5156,
+     "reverbWet": 0.211,
+     "anthroGain": 0.136,
+     "velocity": 0.841
+    },
+    {
+     "year": 2007,
+     "value": 384.02,
+     "vital": {
+      "vit": 67.5,
+      "div": 72.5,
+      "est": 71.2,
+      "pre": 46,
+      "fever": 30.5
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 20,
+     "detuneCents": 12,
+     "bioCutoffHz": 5499,
+     "reverbWet": 0.22,
+     "anthroGain": 0.116,
+     "velocity": 0.838
+    },
+    {
+     "year": 2008,
+     "value": 385.83,
+     "vital": {
+      "vit": 66.8,
+      "div": 71.8,
+      "est": 71.4,
+      "pre": 43.5,
+      "fever": 31.4
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 20,
+     "detuneCents": 11,
+     "bioCutoffHz": 5737,
+     "reverbWet": 0.227,
+     "anthroGain": 0.104,
+     "velocity": 0.834
+    },
+    {
+     "year": 2009,
+     "value": 387.64,
+     "vital": {
+      "vit": 66,
+      "div": 71,
+      "est": 72.5,
+      "pre": 43.5,
+      "fever": 32.2
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 19,
+     "detuneCents": 11,
+     "bioCutoffHz": 5737,
+     "reverbWet": 0.227,
+     "anthroGain": 0.104,
+     "velocity": 0.83
+    },
+    {
+     "year": 2010,
+     "value": 390.1,
+     "vital": {
+      "vit": 65.1,
+      "div": 70.1,
+      "est": 63,
+      "pre": 57.3,
+      "fever": 33.3
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 26,
+     "detuneCents": 15,
+     "bioCutoffHz": 4540,
+     "reverbWet": 0.191,
+     "anthroGain": 0.181,
+     "velocity": 0.825
+    },
+    {
+     "year": 2011,
+     "value": 391.85,
+     "vital": {
+      "vit": 64.3,
+      "div": 69.3,
+      "est": 61.7,
+      "pre": 42.2,
+      "fever": 34.1
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 27,
+     "detuneCents": 15,
+     "bioCutoffHz": 5865,
+     "reverbWet": 0.23,
+     "anthroGain": 0.098,
+     "velocity": 0.822
+    },
+    {
+     "year": 2012,
+     "value": 394.06,
+     "vital": {
+      "vit": 63.5,
+      "div": 68.5,
+      "est": 64.3,
+      "pre": 52,
+      "fever": 35.1
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 21840,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 25,
+     "detuneCents": 14,
+     "bioCutoffHz": 4967,
+     "reverbWet": 0.205,
+     "anthroGain": 0.149,
+     "velocity": 0.818
+    },
+    {
+     "year": 2013,
+     "value": 396.74,
+     "vital": {
+      "vit": 62.4,
+      "div": 67.4,
+      "est": 63.4,
+      "pre": 61.9,
+      "fever": 36.3
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 5456,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 26,
+     "detuneCents": 15,
+     "bioCutoffHz": 4199,
+     "reverbWet": 0.179,
+     "anthroGain": 0.211,
+     "velocity": 0.812
+    },
+    {
+     "year": 2014,
+     "value": 398.81,
+     "vital": {
+      "vit": 61.5,
+      "div": 66.5,
+      "est": 60.8,
+      "pre": 49,
+      "fever": 37.2
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 5456,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 27,
+     "detuneCents": 16,
+     "bioCutoffHz": 5226,
+     "reverbWet": 0.213,
+     "anthroGain": 0.132,
+     "velocity": 0.808
+    },
+    {
+     "year": 2015,
+     "value": 401.01,
+     "vital": {
+      "vit": 60.6,
+      "div": 65.6,
+      "est": 66.5,
+      "pre": 51.7,
+      "fever": 38.2
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 5456,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 23,
+     "detuneCents": 13,
+     "bioCutoffHz": 4992,
+     "reverbWet": 0.206,
+     "anthroGain": 0.147,
+     "velocity": 0.803
+    },
+    {
+     "year": 2016,
+     "value": 404.41,
+     "vital": {
+      "vit": 59.3,
+      "div": 64.3,
+      "est": 51.2,
+      "pre": 77.2,
+      "fever": 39.7
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 5456,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 34,
+     "detuneCents": 20,
+     "bioCutoffHz": 3239,
+     "reverbWet": 0.139,
+     "anthroGain": 0.328,
+     "velocity": 0.797
+    },
+    {
+     "year": 2017,
+     "value": 406.76,
+     "vital": {
+      "vit": 58.3,
+      "div": 63.3,
+      "est": 52.5,
+      "pre": 54.9,
+      "fever": 40.8
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 5456,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 33,
+     "detuneCents": 19,
+     "bioCutoffHz": 4728,
+     "reverbWet": 0.197,
+     "anthroGain": 0.166,
+     "velocity": 0.792
+    },
+    {
+     "year": 2018,
+     "value": 408.72,
+     "vital": {
+      "vit": 57.5,
+      "div": 62.5,
+      "est": 60.7,
+      "pre": 46.6,
+      "fever": 41.6
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 5456,
+      "pulso": 43346,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 28,
+     "detuneCents": 16,
+     "bioCutoffHz": 5443,
+     "reverbWet": 0.219,
+     "anthroGain": 0.119,
+     "velocity": 0.788
+    },
+    {
+     "year": 2019,
+     "value": 411.65,
+     "vital": {
+      "vit": 56.3,
+      "div": 61.3,
+      "est": 52,
+      "pre": 67.3,
+      "fever": 43
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 5456,
+      "pulso": 0,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 34,
+     "detuneCents": 19,
+     "bioCutoffHz": 3831,
+     "reverbWet": 0.165,
+     "anthroGain": 0.249,
+     "velocity": 0.782
+    },
+    {
+     "year": 2020,
+     "value": 414.21,
+     "vital": {
+      "vit": 55.3,
+      "div": 60.3,
+      "est": 59.2,
+      "pre": 59.4,
+      "fever": 44.1
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 5456,
+      "pulso": 0,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 29,
+     "detuneCents": 16,
+     "bioCutoffHz": 4381,
+     "reverbWet": 0.186,
+     "anthroGain": 0.194,
+     "velocity": 0.777
+    },
+    {
+     "year": 2021,
+     "value": 416.41,
+     "vital": {
+      "vit": 54.4,
+      "div": 59.4,
+      "est": 58.6,
+      "pre": 51.7,
+      "fever": 45.1
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 5456,
+      "pulso": 0,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 29,
+     "detuneCents": 17,
+     "bioCutoffHz": 4992,
+     "reverbWet": 0.206,
+     "anthroGain": 0.147,
+     "velocity": 0.772
+    },
+    {
+     "year": 2022,
+     "value": 418.53,
+     "vital": {
+      "vit": 53.6,
+      "div": 58.6,
+      "est": 61.7,
+      "pre": 50,
+      "fever": 46
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 5456,
+      "pulso": 0,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 27,
+     "detuneCents": 15,
+     "bioCutoffHz": 5138,
+     "reverbWet": 0.21,
+     "anthroGain": 0.138,
+     "velocity": 0.768
+    },
+    {
+     "year": 2023,
+     "value": 421.08,
+     "vital": {
+      "vit": 52.5,
+      "div": 57.5,
+      "est": 56.2,
+      "pre": 59.2,
+      "fever": 47.2
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 5456,
+      "pulso": 0,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 31,
+     "detuneCents": 18,
+     "bioCutoffHz": 4396,
+     "reverbWet": 0.186,
+     "anthroGain": 0.193,
+     "velocity": 0.763
+    },
+    {
+     "year": 2024,
+     "value": 424.61,
+     "vital": {
+      "vit": 51.1,
+      "div": 56.1,
+      "est": 47.8,
+      "pre": 80,
+      "fever": 48.8
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 5456,
+      "pulso": 0,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 37,
+     "detuneCents": 21,
+     "bioCutoffHz": 3089,
+     "reverbWet": 0.132,
+     "anthroGain": 0.352,
+     "velocity": 0.756
+    },
+    {
+     "year": 2025,
+     "value": 427.35,
+     "vital": {
+      "vit": 50,
+      "div": 55,
+      "est": 49.5,
+      "pre": 63.2,
+      "fever": 50
+     },
+     "masks": {
+      "bajo": 1,
+      "arpegio": 5456,
+      "pulso": 0,
+      "canto": 0
+     },
+     "scaleSize": 4,
+     "jitterMs": 35,
+     "detuneCents": 20,
+     "bioCutoffHz": 4107,
+     "reverbWet": 0.176,
+     "anthroGain": 0.22,
+     "velocity": 0.75
+    }
+   ]
+  }
+ }
+}

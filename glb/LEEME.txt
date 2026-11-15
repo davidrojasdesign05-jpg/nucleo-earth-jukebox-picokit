@@ -1,0 +1,5 @@
+Suelta aquí los modelos con estos nombres (todos son opcionales):
+  lobby.glb   gases.glb   hielo.glb   jungla.glb   fin.glb   esfera.glb
+El origen (0,0,0) es el piso bajo los pies del usuario; el frente es -Z; unidades en metros.
+Posición, giro, escala y si ocultan los paneles generados se ajustan en src/config.js.
+Después: npm run build

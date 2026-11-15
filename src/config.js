@@ -59,7 +59,7 @@ export const TUNING = {
   sonidoRico: true,        // música de los lugares enriquecida (espacio, eco, lecho armónico, voces más cálidas). false = el sonido original.
   smogMax: 0.045,          // gases: densidad máxima de la neblina al final del dato (0 = sin smog)
   smogColor: 0x4a3c30,     // color del smog
-  voz: { rate: 0.92, pitch: 1.05, volume: 0.95, pausa: 280, respiro: 2500 },   // narración: velocidad, tono, volumen y pausa entre frases (ms)
+  voz: { rate: 0.92, pitch: 1.05, volume: 0.95, pausa: 280, respiro: 2500, nivel: 1.15, duck: 0.5 },   // nivel = volumen de la narradora; duck = cuánto baja la música mientras habla   // narración: velocidad, tono, volumen y pausa entre frases (ms)
   lobbyLevel: 0.16,        // volumen de la música en el lobby (antes 0.35): la antesala es callada
   leitmotiv: "marea",      // firma sonora al entrar: "orbita", "pulso", "marea", "senal" o "" para ninguna (ver src/sfx.js)
   diagnostico: true        // muestra bajo "Elige un lugar" si hay VR, qué mandos ve y si pueden vibrar. Ponlo en false para la demo.

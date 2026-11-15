@@ -166,7 +166,8 @@ export class NucleoSynth {
     n.geoFilter.type = g.type;
     n.geoFilter.frequency.setTargetAtTime(g.hz, t, tc);
     n.geoFilter.Q.setTargetAtTime(g.q, t, tc);
-    const bed = this.rich ? 0.3 : 1;                         // el lecho de ruido queda como un aliento, no como un soplo constante
+    const limpio = this.rich && this.firmas !== false && sig === "hielo";   // hielo: solo la firma (arpegio, velo y gotas), sin lecho de ruido ni notas graves de fondo
+    const bed = limpio ? 0 : this.rich ? 0.3 : 1;                         // el lecho de ruido queda como un aliento, no como un soplo constante
     n.geoGain.gain.setTargetAtTime(g.gain * bed, t, tc);
     n.swell.frequency.setTargetAtTime(g.swellHz, t, tc);
     n.swellDepth.gain.setTargetAtTime(g.gain * g.depth * bed, t, tc);
@@ -178,10 +179,10 @@ export class NucleoSynth {
     const v01 = Math.max(0, Math.min(1, d.v ?? 1)), root = this._padRoot(), pt = immediate ? 0.05 : 1.2;
     [1, 1.5, 2, 2 * Math.pow(2, 4 / 12)].forEach((m, i) => n.padOsc[i].frequency.setTargetAtTime(root * m, t, pt));
     n.padG[3].gain.setTargetAtTime(0.3 * v01 * v01, t, immediate ? 0.3 : 2);                 // la tercera mayor: lo alegre, que se pierde
-    n.pad.gain.setTargetAtTime(this.rich ? 0.05 * (0.4 + 0.6 * v01) : 0, t, immediate ? 0.3 : 1.5);
+    n.pad.gain.setTargetAtTime(limpio ? 0 : this.rich ? 0.05 * (0.4 + 0.6 * v01) : 0, t, immediate ? 0.3 : 1.5);
     const up = sig === "gases" ? 2 : 1;                        // gases: el pedal sube una octava (no tan grave)
     [0.5, 0.75, 1].forEach((m, i) => n.pedalOsc[i].frequency.setTargetAtTime(root * m * up, t, pt));
-    n.pedal.gain.setTargetAtTime(this.rich ? (0.11 / up) * d.p : 0, t, immediate ? 0.3 : 1.5);
+    n.pedal.gain.setTargetAtTime(limpio ? 0 : this.rich ? (0.11 / up) * d.p : 0, t, immediate ? 0.3 : 1.5);
     const pr = C.pressureOf(sig), isHeat = pr.type === "heat";
     n.anthro.gain.setTargetAtTime(isHeat || this.rich ? 0 : d.anthroGain, t, tc);
     n.heat.gain.setTargetAtTime(isHeat && !this.rich ? d.p * d.p : 0, t, tc);

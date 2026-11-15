@@ -38,7 +38,7 @@ const sun = new THREE.DirectionalLight(0xffffff, 1.2); sun.position.set(2, 5, 3)
 const synth = new NucleoSynth(); synth.rich = TUNING.sonidoRico !== false;
 const haptics = new Haptics(); haptics.level = TUNING.comfort;
 /** Patrón táctil en una mano; sin mano (teclado, palanca sin dueño), en las dos. */
-const hx = (hand, name, scale) => { if (hand) haptics.play(hand, name, scale); else { haptics.play("left", name, scale); haptics.play("right", name, scale); } };
+const hx = (hand, name, scale) => { if (hand) haptics.play(hand, name, scale); else { haptics.play("left", name, scale); haptics.play("right", name, scale); }  if ((name === "faro" || name === "tope") && hands.some((h) => h.isHand && (!hand || h.hand === hand))) synth.tick(name === "faro" ? 1700 : 420, name === "faro" ? 0.012 : 0.04); };   // con manos no hay vibración: el faro y el tope suenan
 
 const app = { state: "inicio", info: false, desc: false, dash: "hielo", yearPos: 0, scale: 1, speed: 1, scrubbing: false, sensory: false, uiAlpha: 1, hover: null, xr: false, beat: 0 };
 /* ---------- idioma: español / inglés. tx(es, en) elige el texto; los nombres, unidades y fuentes del dato cambian con él. ---------- */
@@ -63,6 +63,7 @@ function sfx(name, opts) { const ctx = synth.ctx; if (!ctx || ctx.state !== "run
 const uiMats = [];
 function ui(mat, base = 1) { mat.transparent = true; mat.userData.base = base; mat.opacity = base; uiMats.push(mat); return mat; }
 const interactives = [];
+const LIFT = [], UIL = { lift: 0 };   // paneles colocados para una persona de pie (ojos a 1.6 m); se suben o bajan con la altura real de los ojos
 function button(mesh, id, onSelect) { mesh.userData.hoverId = id; mesh.userData.onSelect = onSelect; interactives.push(mesh); return mesh; }
 
 function wrap(g, text, x, y, maxW, lh) {
@@ -122,7 +123,7 @@ for (const id of ORDER) {
     g.fillStyle = N.muted; g.font = `500 26px ${FONT}`;
     g.fillText(`${p.years[0].year}–${p.years[p.years.length - 1].year} · ${p.source}`, 56, y + 4);
   });
-  pan.position.copy(polar(a.az, 2.6, 1.55)); pan.lookAt(0, 1.55, 0);
+  pan.position.copy(polar(a.az, 2.6, 1.55)); pan.lookAt(0, 1.55, 0); LIFT.push(pan);
   const go = () => startAmbiente(id);
   button(sec, id, go); button(pan, id, go);
   gLobby.add(sec, pan); decor.lobby.push(pan);
@@ -220,7 +221,7 @@ const hud = panel(1.3, 0.62, 1280, 610, (g, w, h) => {     // isla del dato: peq
   g.font = `500 26px ${FONT}`; g.fillText(`${p.years[0].year}–${p.years[p.years.length - 1].year} · ${tx("Fuente", "Source")}: ${p.source}`, 52, 504);
   link(tx("Ocultar", "Hide"), 568);
 });
-hud.position.copy(polar(26, 2.3, 1.72)); hud.lookAt(0, 1.6, 0); gAmb.add(hud); button(hud, "isla", () => toggleInfo());
+hud.position.copy(polar(26, 2.3, 1.72)); hud.lookAt(0, 1.6, 0); gAmb.add(hud); LIFT.push(hud); button(hud, "isla", () => toggleInfo());
 
 /* ---------- descripciones: texto (y voz, si el navegador la tiene) solo si la persona las pide ---------- */
 const lista = (xs) => (xs.length < 2 ? xs.join("") : xs.slice(0, -1).join(", ") + tx(" y ", " and ") + xs[xs.length - 1]);
@@ -254,15 +255,39 @@ function pickVoice() {
   return (VOZ.cache[lang] = vs.slice().sort((x, y) => score(y) - score(x))[0]);
 }
 if (window.speechSynthesis) { try { speechSynthesis.addEventListener("voiceschanged", () => { VOZ.cache = {}; }); speechSynthesis.getVoices(); } catch (e) { /* sin lista de voces: se usa la del sistema */ } }
+/* Narradora: voz neuronal generada de antemano (una voz femenina por idioma), guardada en un paquete por idioma (public/voz).
+   Cada frase es un clip; el índice dice dónde empieza cada uno dentro del paquete. Si el paquete no está o falta un clip,
+   se usa la voz del dispositivo. La música del dato sigue siendo síntesis en vivo: solo la narración viene preparada. */
+const NARR = { idx: null, packs: {}, loading: {}, src: null, gain: null, cache: new Map() };
+function narrLoad() {
+  const lang = app.lang; if (NARR.loading[lang]) return NARR.loading[lang];
+  return (NARR.loading[lang] = (async () => { if (!NARR.idx) NARR.idx = await (await fetch("voz/voz.json")).json(); NARR.packs[lang] = await (await fetch(`voz/voz-${lang}.bin`)).arrayBuffer(); })().catch(() => { NARR.loading[lang] = null; }));
+}
+function narrHas(keys) { const ix = NARR.idx && NARR.idx[app.lang]; return !!(ix && NARR.packs[app.lang] && synth.ctx && keys.every((k) => ix[k])); }
+function duck(on) { if (synth.nodes) synth.nodes.master.gain.setTargetAtTime(synth.level * (on ? (TUNING.voz && TUNING.voz.duck) ?? 0.5 : 1), synth.ctx.currentTime, 0.25); }   // la música baja mientras habla
+function narrStop() { if (NARR.src) { try { NARR.src.onended = null; NARR.src.stop(); } catch (e) { /* ya había terminado */ } NARR.src = null; duck(false); } }
+async function narrPlay(keys, token, done) {
+  const ctx = synth.ctx, lang = app.lang, ix = NARR.idx[lang];
+  if (!NARR.gain) { NARR.gain = ctx.createGain(); NARR.gain.connect(ctx.destination); } NARR.gain.gain.value = (TUNING.voz && TUNING.voz.nivel) ?? 1.15; duck(true);
+  try {
+    for (const k of keys) {
+      const id = lang + "|" + k, fijo = !/_\d+$/.test(k) || k.startsWith("presion_"); let buf = NARR.cache.get(id);
+      if (!buf) { const [o, n] = ix[k]; buf = await ctx.decodeAudioData(NARR.packs[lang].slice(o, o + n)); if (fijo) NARR.cache.set(id, buf); }   // los años no se guardan: son muchos
+      if (token !== VOZ.token || !app.desc) return;
+      await new Promise((res) => { const sr = ctx.createBufferSource(); sr.buffer = buf; sr.connect(NARR.gain); sr.onended = res; NARR.src = sr; sr.start(); });
+      if (token !== VOZ.token) return; await new Promise((res) => setTimeout(res, 240));
+    }
+  } catch (e) { /* si un clip falla, la narración termina ahí */ } finally { if (token === VOZ.token) { NARR.src = null; duck(false); done(); } }
+}
 /** Pide decir algo. Siempre gana lo último pedido. Reglas para que no canse:
     · prio (cambio de pantalla, o lo pediste tú): calla lo que suene y habla.
     · sin prio (años, lugar al frente): nunca interrumpe; espera a que termine lo anterior y a un respiro, y si para entonces
       ya dijo eso mismo (misma clave o mismo texto) no lo repite. */
-function speak(text, { prio = false, key = "", espera = 800 } = {}) {
-  if (!app.desc || !window.speechSynthesis || !text) return;
+function speak(text, { prio = false, key = "", espera = 800, clips = null } = {}) {
+  if (!app.desc || !text || (!window.speechSynthesis && !(clips && narrHas(clips)))) return;
   if (!prio && ((key && key === VOZ.lastKey) || text === VOZ.lastText)) { if (!VOZ.prio) VOZ.pending = ""; return; }   // ya lo dijo: nada pendiente
   if (VOZ.pending && VOZ.prio && !prio) return;                                                                         // hay algo importante en cola: no lo pises
-  VOZ.pending = text; VOZ.prio = prio; VOZ.key = key; VOZ.at = performance.now() + (prio ? Math.min(espera, 400) : espera);
+  VOZ.pending = text; VOZ.clips = clips; VOZ.prio = prio; VOZ.key = key; VOZ.at = performance.now() + (prio ? Math.min(espera, 400) : espera);
 }
 function updateVoz() {
   const now = performance.now(); if (!VOZ.pending || now < VOZ.at) return;
@@ -272,6 +297,8 @@ function updateVoz() {
   const text = VOZ.pending, frases = text.split(/(?<=[.!?])\s+/).filter(Boolean), token = ++VOZ.token;
   VOZ.pending = ""; VOZ.lastText = text; VOZ.lastKey = VOZ.key; VOZ.prio = false; VOZ.speaking = true;
   const fin = () => { if (token === VOZ.token) { VOZ.speaking = false; VOZ.endedAt = performance.now(); } };
+  const clips = VOZ.clips; VOZ.clips = null; narrStop();
+  if (clips && narrHas(clips)) { try { if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) { /* sin voz del sistema */ } narrPlay(clips, token, fin); return; }   // voz neuronal
   try {
     speechSynthesis.cancel(); const voice = pickVoice();
     const next = (i) => {
@@ -288,19 +315,19 @@ const desc = panel(1.5, 0.55, 1200, 440, (g, w, h) => {
   g.fillStyle = N.muted; g.font = `600 26px ${FONT}`; g.fillText(tx("Descripción", "Description"), 40, 52);
   g.fillStyle = N.ink; g.font = `500 32px ${FONT}`; let y = 106; for (const line of describe()) y = wrap(g, line, 40, y, w - 80, 42) + 8;
 });
-desc.position.copy(polar(-30, 2.2, 0.95)); desc.lookAt(0, 1.5, 0); desc.visible = false; scene.add(desc);
+desc.position.copy(polar(-30, 2.2, 0.95)); desc.lookAt(0, 1.5, 0); desc.visible = false; scene.add(desc); LIFT.push(desc);
 const descBtn = panel(0.62, 0.11, 900, 160, (g, w, h) => {
   const on = app.hover === "descripciones", text = app.desc ? tx("Ocultar descripciones", "Hide descriptions") : tx("Ver descripciones", "Show descriptions");
   g.fillStyle = on ? N.ink : N.muted; g.font = `${on ? 700 : 600} 54px ${FONT}`; g.fillText(text, 30, 84); g.fillRect(30, 104, g.measureText(text).width, on ? 4 : 2);
 });
-descBtn.position.copy(polar(30, 2.2, 0.95)); descBtn.lookAt(0, 1.5, 0); descBtn.visible = false; scene.add(descBtn); button(descBtn, "descripciones", () => toggleDesc());
+descBtn.position.copy(polar(30, 2.2, 0.95)); descBtn.lookAt(0, 1.5, 0); descBtn.visible = false; scene.add(descBtn); LIFT.push(descBtn); button(descBtn, "descripciones", () => toggleDesc());
 const langBtn = panel(0.62, 0.11, 900, 160, (g, w, h) => {   // cambia entre español e inglés: muestra el idioma al que cambias
   const on = app.hover === "idioma", text = tx("English", "Español");
   g.fillStyle = on ? N.ink : N.muted; g.font = `${on ? 700 : 600} 54px ${FONT}`; g.fillText(text, 30, 84); g.fillRect(30, 104, g.measureText(text).width, on ? 4 : 2);
 });
-langBtn.position.copy(polar(30, 2.2, 0.8)); langBtn.lookAt(0, 1.5, 0); langBtn.visible = false; scene.add(langBtn); button(langBtn, "idioma", () => setLang(app.lang === "en" ? "es" : "en"));
-function toggleInfo() { app.info = !app.info; sfx(app.info ? "apertura" : "cierre"); hud.redraw(); if (app.info) speak(describe()[0], { prio: true }); }
-function toggleDesc() { app.desc = !app.desc; sfx(app.desc ? "apertura" : "cierre"); descKey = ""; descBtn.redraw(); if (!app.desc && window.speechSynthesis) { VOZ.pending = ""; VOZ.token++; speechSynthesis.cancel(); } }
+langBtn.position.copy(polar(30, 2.2, 0.8)); langBtn.lookAt(0, 1.5, 0); langBtn.visible = false; scene.add(langBtn); LIFT.push(langBtn); button(langBtn, "idioma", () => setLang(app.lang === "en" ? "es" : "en"));
+function toggleInfo() { app.info = !app.info; sfx(app.info ? "apertura" : "cierre"); hud.redraw(); if (app.info) speak(describe()[0], { prio: true, clips: [synth.idx === 0 ? "intacto" : `${app.dash}_${synth.idx}`] }); }
+function toggleDesc() { app.desc = !app.desc; sfx(app.desc ? "apertura" : "cierre"); descKey = ""; descBtn.redraw(); if (!app.desc && window.speechSynthesis) { VOZ.pending = ""; VOZ.token++; speechSynthesis.cancel(); } if (!app.desc) narrStop(); else { descState = ""; narrLoad(); } }
 let descKey = "", descState = "";
 let diagAt = 0;
 function updateDesc() {
@@ -314,10 +341,16 @@ function updateDesc() {
   const yk = `${app.dash}|${synth.idx}`, e = synth.entry;
   // el año: completo la primera vez en cada lugar; después, solo el año y la cifra
   const anio = () => { const full = VOZ.dashSaid !== app.dash; VOZ.dashSaid = app.dash; return full ? L[0] : synth.idx === 0 ? tx("Lugar intacto.", "Intact place.") : `${e.year}: ${Number(e.value).toLocaleString(loc())}.`; };
-  if (app.state !== descState) { descState = app.state; VOZ.dashSaid = app.state === "ambiente" ? app.dash : ""; speak(app.state === "ambiente" ? `${L[0]} ${L[3]}` : L.join(" "), { prio: true, key: app.state === "ambiente" ? yk : "" }); }   // al cambiar de pantalla: la descripción completa
-  else if (app.state === "lobby") speak(L[1], { key: "frente|" + NAV.front, espera: 1000 });
-  else if (app.state === "ambiente" && performance.now() - userYearAt < 1500) speak(anio(), { key: yk, espera: 900 });                    // moviste la esfera: al detenerte, dónde quedaste
-  else if (app.state === "ambiente" && synth.entry.year % 10 === 0) speak(`${anio()} ${L[1]} ${L[2]}`, { key: yk });                       // sola: una vez por década
+  const yc = synth.idx === 0 ? "intacto" : `${app.dash}_${synth.idx}`, pr = synth.derived.p;
+  if (app.state !== descState) {                                                    // al cambiar de pantalla: bienvenida o presentación del lugar
+    descState = app.state; VOZ.dashSaid = app.state === "ambiente" ? app.dash : "";
+    const clips = app.state === "lobby" ? [VOZ.welcomed ? "lobby" : "bienvenida", "frente_" + NAV.front] : app.state === "ambiente" ? ["entrar_" + app.dash] : app.state === "fin" ? ["fin_" + app.dash] : null;
+    if (app.state === "lobby") VOZ.welcomed = true;
+    speak(app.state === "ambiente" ? `${L[0]} ${L[3]}` : L.join(" "), { prio: true, key: app.state === "ambiente" ? yk : app.state === "lobby" ? "frente|" + NAV.front : "", clips });
+  }
+  else if (app.state === "lobby") speak(L[1], { key: "frente|" + NAV.front, espera: 1000, clips: ["frente_" + NAV.front] });
+  else if (app.state === "ambiente" && performance.now() - userYearAt < 1500) speak(anio(), { key: yk, espera: 900, clips: [yc] });                                // moviste la esfera: al detenerte, dónde quedaste
+  else if (app.state === "ambiente" && synth.entry.year % 10 === 0) speak(`${anio()} ${L[1]} ${L[2]}`, { key: yk, clips: [yc, "presion_" + (pr < 0.33 ? 0 : pr < 0.66 ? 1 : 2)] });   // sola: una vez por década
 }
 
 // Esfera cinética: girarla recorre los años, su tamaño es la velocidad.
@@ -355,9 +388,9 @@ sphere.add(KS.core, KS.mesh); sphereWire.visible = false; sphereCore.visible = f
 window.__nucleo.KS = KS;
 /** Serie del ambiente → valores 0..1 por año (índice 0 = lugar intacto). */
 function buildSphereData(id) {
-  const p = PRESETS[id], ys = p.years, vals = ys.map((y) => Number(y.value)), lo = Math.min(...vals), hi = Math.max(...vals), span = hi - lo || 1;
+  const p = PRESETS[id], ys = p.years, vals = ys.map((y) => Number(y.value)), hi = Math.max(...vals), lo = (TUNING.sphereBase || { gases: 280, hielo: 0, jungla: 0 })[id] ?? Math.min(...vals), span = hi - lo || 1;   // base real de cada dato: CO₂ preindustrial (280 ppm); hielo y tala desde cero
   const norm = (x) => 0.12 + 0.88 * clamp((Number(x) - lo) / span, 0, 1), pre = (e, fb) => clamp(((e.vital && e.vital.pre) ?? fb * 100) / 100, 0, 1);
-  const ref = p.reference || ys[0], v0 = norm(ref.value ?? ys[0].value);
+  const ref = p.reference || ys[0], v0 = norm(id === "hielo" ? hi : id === "gases" ? lo : ref.value ?? ys[0].value);   // lugar intacto: hielo completo, CO₂ preindustrial, cero tala
   KS.val = new Float32Array(ys.length + 1); KS.pre = new Float32Array(ys.length + 1); KS.val[0] = v0; KS.pre[0] = pre(ref, 0.05);
   ys.forEach((y, j) => { KS.val[j + 1] = norm(y.value); KS.pre[j + 1] = pre(y, KS.val[j + 1]); });
   KS.dash = id;
@@ -399,7 +432,7 @@ function updateKinetic(dt, d) {
     const yf = fr[i] * cnt, j0 = Math.floor(yf), j1 = Math.min(cnt, j0 + 1), t = yf - j0, v = lerp(val[j0], val[j1], t), pr = clamp(0.5 * lerp(pre[j0], pre[j1], t) + 0.5 * (v - 0.12) / 0.88, 0, 1);   // color: presión y dato a partes iguales
     const shown = yf <= now + 0.5, dc = Math.abs(yf - now), cur = dc < 0.75 ? 1 - dc / 0.75 : 0;     // lo ocurrido · el año que suena
     const u = (v - 0.12) / 0.88; let hv = v, wv = 1, q = pr, fell = false, latK = 0.6 + 0.4 * lat[i], puff = 0.1 * u;
-    if (mode === "hielo") { const e = clamp((0.16 + 0.78 * u - (1 - ny) / 2) / 0.07, 0, 1); hv = e * (0.35 + 0.4 * u); wv = lerp(0.5, 1, e); q = e * (0.5 + 0.5 * u); latK = 1; puff = 0; }
+    if (mode === "hielo") { const e = clamp((0.9 * u - (1 - ny) / 2) / 0.05, 0, 1);   /* (1 − ny)/2 es la fracción de área de la esfera desde el polo: el área blanca es proporcional a la extensión real */ hv = e * (0.35 + 0.4 * u); wv = lerp(0.5, 1, e); q = e * (0.5 + 0.5 * u); latK = 1; puff = 0; }
     else if (mode === "jungla") { fell = rnd[i] < u * 0.92; hv = fell ? 0 : 0.5 + 0.5 * rnd[(i * 7) % n]; wv = fell ? 0.7 : 1; q = rnd[(i * 13) % n]; puff = 0; }
     let h = shown ? (0.35 + hv * 2.4) * latK * (1 + cur * (0.15 + beat * 0.5)) : 0.22, sxy = shown ? (0.85 + v * 0.3) * wv : 0.6, off = shown ? puff : 0;
     let w = 1;                                                               // Sphere_Controller: 0 en el centro del toque, 1 fuera de su radio
@@ -437,7 +470,7 @@ const finPanel = panel(1.7, 0.8, 1280, 602, (g, w, h) => {
   g.fillStyle = N.muted; g.font = `500 30px ${FONT}`; g.fillText(tx("Lo que escuchaste es el dato. Nada fue grabado.", "What you heard is the data. Nothing was recorded."), 56, 376);
   g.font = `500 24px ${FONT}`; wrap(g, `${Number(last.value).toLocaleString(loc())} ${p.unit} ${tx("en", "in")} ${last.year} · ${p.source}`, 56, 450, w - 112, 34);
 });
-finPanel.position.copy(polar(0, 2.4, 2.25)); finPanel.lookAt(0, 1.6, 0); gFin.add(finPanel); decor.fin.push(finPanel);
+finPanel.position.copy(polar(0, 2.4, 2.25)); finPanel.lookAt(0, 1.6, 0); gFin.add(finPanel); LIFT.push(finPanel); decor.fin.push(finPanel);
 function finButton(labelFn, az, id, fn) {
   const b = panel(0.75, 0.24, 640, 205, (g, w, h) => {       // solo texto; al apuntar: peso 700 y la línea se enciende
     const on = app.hover === id, label = labelFn();
@@ -445,7 +478,7 @@ function finButton(labelFn, az, id, fn) {
     const tw = g.measureText(label).width; g.textAlign = "left";
     g.fillStyle = on ? N.ink : "rgba(245,245,245,.28)"; g.fillRect(w / 2 - tw / 2, 146, tw, on ? 4 : 2);
   });
-  b.position.copy(polar(az, 2.3, 1.15)); b.lookAt(0, 1.3, 0); gFin.add(b); decor.fin.push(b); button(b, id, fn); return b;
+  b.position.copy(polar(az, 2.3, 1.15)); b.lookAt(0, 1.3, 0); gFin.add(b); LIFT.push(b); decor.fin.push(b); button(b, id, fn); return b;
 }
 const btnRepeat = finButton(() => tx("Repetir", "Replay"), -11, "repetir", () => startAmbiente(app.dash));
 const btnLobby = finButton(() => tx("Volver al lobby", "Back to lobby"), 11, "lobby", () => goLobby());
@@ -553,6 +586,25 @@ function updateVariants() {      // estados del lugar a lo largo del recorrido: 
 loadGLB("lobby", gLobby); loadGLB("fin", gFin);   // la esfera ya no es un GLB: es la esfera cinética del .blend (ver KS)
 
 /* ---------- estados ---------- */
+/* Aparecer bien orientado. En el visor no se puede girar a la persona, así que se gira el mundo: el espacio de referencia se
+   recoloca para que donde estás parado sea el origen y hacia donde miras sea el frente (−Z), que es donde están la esfera y el aro.
+   Se pide al entrar a la carga, al lobby y a cada lugar; se ejecuta en el siguiente cuadro, cuando hay pose de la cabeza. */
+let xrFrame = null, baseRef = null, recenterAsk = false;
+function liftUI(eye) { UIL.lift = clamp(eye - 1.6, -0.75, 0.3); for (const m of LIFT) { if (m.userData.baseY === undefined) m.userData.baseY = m.position.y; m.position.y = m.userData.baseY + UIL.lift; } }
+function recenter() { recenterAsk = true; if (!app.xr) { yaw = 0; pitch = 0; } }
+function doRecenter() {
+  if (!recenterAsk) return; if (!app.xr) { recenterAsk = false; liftUI(1.6); return; }
+  if (!xrFrame) return;
+  try {
+    if (!baseRef) baseRef = renderer.xr.getReferenceSpace(); const pose = xrFrame.getViewerPose(baseRef); if (!pose) return;
+    const q = pose.transform.orientation, pp = pose.transform.position, f = tmpV.set(0, 0, -1).applyQuaternion(tmpQ.set(q.x, q.y, q.z, q.w));
+    if (Math.hypot(f.x, f.z) < 0.25) return;                                         // mirando al techo o al piso: espera a tener un rumbo claro
+    const th = Math.atan2(-f.x, -f.z);
+    renderer.xr.setReferenceSpace(baseRef.getOffsetReferenceSpace(new XRRigidTransform({ x: pp.x, y: 0, z: pp.z }, { x: 0, y: Math.sin(th / 2), z: 0, w: Math.cos(th / 2) })));
+    liftUI(pp.y > 0.5 ? pp.y : 1.6); recenterAsk = false;
+    if (app.state === "ambiente") sphere.position.y = clamp((pp.y > 0.5 ? pp.y : 1.6) - TUNING.sphereBelowEyes, 0.7, 1.5);
+  } catch (e) { recenterAsk = false; }
+}
 function show() {
   gLobby.visible = app.state === "lobby"; gAmb.visible = app.state === "ambiente" || app.state === "fin"; gFin.visible = app.state === "fin";
   hud.visible = sphere.visible = app.state === "ambiente"; dome.visible = app.state === "lobby";
@@ -561,11 +613,13 @@ function show() {
   platGlow.material.color.set(lit(a.color)); platBody.material.color.set(0x101010).lerp(tmpC.setHex(a.color), 0.03);   // la plataforma toma un matiz del lugar
 }
 function goLobby(silent = false) {
+  recenter();
   if (app.state === "ambiente" || app.state === "fin") sfx("cierre");
   app.state = "lobby"; app.hover = null; setSensory(false); panHeight(); panHint.redraw();
   synth.setLevel(silent ? 0 : TUNING.lobbyLevel ?? 0.16); show();   // el lobby es la antesala: la música queda al fondo
 }
 function startAmbiente(id) {
+  recenter();
   app.dash = id; app.state = "ambiente"; app.yearPos = 0; app.scale = 1; app.speed = 1; app.scrubbing = false; barsHere = 0;
   sfx("transicion"); synth.setDashboard(id); synth.setLevel(0.55); synth.play();
   panHeight(); buildSphereData(id); camera.getWorldPosition(ksCam); sphere.position.y = clamp(ksCam.y - TUNING.sphereBelowEyes, 0.7, 1.5);   // la esfera queda un poco abajo de tus ojos
@@ -734,7 +788,7 @@ function updateNav(dt) {
       if (now - NAV.lastNote > 60) { NAV.lastNote = now; sfx("giro", { step: f }); if (dPlace > ARC_STEP / 2 - PAN_STEP * 0.6) hx(NAV.hand, "diente"); else hx(NAV.hand, "tick", 0.6 + 0.9 * near); }
     }
     NAV.front = nearestPlace(NAV.angle).id; gLobby.rotation.y = NAV.angle;
-    lobbyTitle.position.copy(polar(NAV.angle / DEG, 2.6, 2.35)); lobbyTitle.lookAt(0, 2.0, 0);   // el título no gira con el mundo
+    lobbyTitle.position.copy(polar(NAV.angle / DEG, 2.6, 2.35 + UIL.lift)); lobbyTitle.lookAt(0, 2.0 + UIL.lift, 0);   // el título no gira con el mundo
     for (const id of ORDER) placeMark(panMarks[id], wrapPi(AMBIENTES[id].az * DEG - NAV.angle));
   } else {
     const others = ARC_ORDER.filter((x) => x !== app.dash);
@@ -744,21 +798,31 @@ function updateNav(dt) {
 
 /* ---------- entrada: mandos XR ---------- */
 const raycaster = new THREE.Raycaster(), hands = [];
+/* Manos sin mandos (WebXR Hand Input). El pellizco de pulgar e índice hace de gatillo: corto = elegir o entrar; sostenido y moviendo
+   la mano = girar el mundo o el tiempo; con las dos manos = velocidad. La punta del índice es el punto que toca el aro y la esfera.
+   Las manos no vibran: las confirmaciones quedan en el sonido. */
+function handPos(h, out) {
+  const j = h.isHand && h.handObj && h.handObj.joints && h.handObj.joints["index-finger-tip"];
+  return j && j.visible !== false ? j.getWorldPosition(out) : h.ctrl.getWorldPosition(out);
+}
 for (let i = 0; i < 2; i++) {
-  const ctrl = renderer.xr.getController(i), h = { ctrl, hand: null, grip: false, lastAngle: 0, btn: [], hover: null };
+  const ctrl = renderer.xr.getController(i), handObj = renderer.xr.getHand(i), h = { ctrl, handObj, isHand: false, hand: null, grip: false, lastAngle: 0, btn: [], hover: null };
+  scene.add(handObj);
+  handObj.addEventListener("pinchstart", () => { if (h.isHand && !h.trig) ctrl.dispatchEvent({ type: "selectstart" }); });   // por si el navegador no avisa del pellizco
+  handObj.addEventListener("pinchend", () => { if (h.isHand && h.trig) ctrl.dispatchEvent({ type: "selectend" }); });
   const ray = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3(0, 0, -1)]), ui(new THREE.LineBasicMaterial({ color: 0xffffff }), 0.5));
   ray.scale.z = 25; ctrl.add(ray, new THREE.Mesh(new THREE.SphereGeometry(0.02, 12, 8), new THREE.MeshBasicMaterial({ color: 0xffffff })));
-  ctrl.addEventListener("connected", (e) => { h.hand = e.data.handedness; h.source = e.data; ctrl.visible = true; haptics.setSources(renderer.xr.getSession()); });
-  ctrl.addEventListener("disconnected", () => { h.hand = null; h.source = null; ctrl.visible = false; });
-  ctrl.addEventListener("selectstart", () => {               // gatillo: elige lo que apuntas; si no apuntas a nada, agarra
-    h.trig = true;
+  ctrl.addEventListener("connected", (e) => { h.hand = e.data.handedness; h.source = e.data; h.isHand = !!e.data.hand; ctrl.visible = true; haptics.setSources(renderer.xr.getSession()); });
+  ctrl.addEventListener("disconnected", () => { h.hand = null; h.source = null; h.isHand = false; h.trig = false; ctrl.visible = false; });
+  ctrl.addEventListener("selectstart", () => {               // gatillo o pellizco: elige lo que apuntas; si no apuntas a nada, agarra
+    if (h.trig) return; h.trig = true; if (h.isHand) synth.tick(1200, 0.03);
     if (h.hover) { select(h.hover, h.hand); return; }
-    h.ctrl.getWorldPosition(hp);
+    handPos(h, hp);
     if (app.state === "lobby") { h.grab = { a: Math.atan2(hp.x, -hp.z), moved: 0, t0: performance.now() }; NAV.grab = true; NAV.hand = h.hand; NAV.target = null; NAV.settled = null; hx(h.hand, "tick"); }   // agarra el mundo
     else if (app.state === "ambiente") { h.grip = true; h.byTrigger = true; h.lastAngle = handAngle(h); gripChanged(); hx(h.hand, "tick"); }                                           // agarra el tiempo
   });
   ctrl.addEventListener("selectend", () => {
-    h.trig = false;
+    if (!h.trig) return; h.trig = false;
     if (h.grab) {
       const g = h.grab; h.grab = null; if (!hands.some((x) => x.grab) && !NAV.touch[0] && !NAV.touch[1]) NAV.grab = false;
       if (app.state === "lobby" && g.moved < 0.05 && performance.now() - g.t0 < 400) { sfx("confirmacion"); hx(h.hand, "confirmar"); startAmbiente(NAV.front); }   // toque corto: entrar al lugar del frente
@@ -770,12 +834,12 @@ for (let i = 0; i < 2; i++) {
   ctrl.visible = false; scene.add(ctrl); hands.push(h);
 }
 const sphereC = new THREE.Vector3().fromArray(TUNING.sphereCenter), hp = new THREE.Vector3(), hp2 = new THREE.Vector3();
-function handAngle(h) { h.ctrl.getWorldPosition(hp); return Math.atan2(hp.x - sphereC.x, -(hp.z - sphereC.z)); }
+function handAngle(h) { handPos(h, hp); return Math.atan2(hp.x - sphereC.x, -(hp.z - sphereC.z)); }
 let twoHand = null;
 function gripChanged() {
   const g = hands.filter((h) => h.grip);
   app.scrubbing = app.state === "ambiente" && g.length === 1;
-  if (g.length === 2) { g[0].ctrl.getWorldPosition(hp); g[1].ctrl.getWorldPosition(hp2); twoHand = { d0: Math.max(0.05, hp.distanceTo(hp2)), s0: app.scale }; } else twoHand = null;
+  if (g.length === 2) { handPos(g[0], hp); handPos(g[1], hp2); twoHand = { d0: Math.max(0.05, hp.distanceTo(hp2)), s0: app.scale }; } else twoHand = null;
   for (const h of g) h.lastAngle = handAngle(h);
   if (app.state === "ambiente") hud.redraw();
 }
@@ -800,6 +864,9 @@ function updateXRInput(dt) {
   let hoverId = null, hoverHand = null;
   for (const h of hands) {
     if (!h.hand) continue;
+    if (h.isHand && !h.dots && h.handObj.joints && h.handObj.joints["index-finger-tip"]) {   // manos: un punto en cada yema y en la muñeca
+      h.dots = true; for (const nm of ["thumb-tip", "index-finger-tip", "middle-finger-tip", "ring-finger-tip", "pinky-finger-tip", "wrist"]) { const j = h.handObj.joints[nm]; if (j) j.add(new THREE.Mesh(new THREE.SphereGeometry(nm === "wrist" ? 0.011 : nm === "index-finger-tip" ? 0.009 : 0.006, 10, 8), new THREE.MeshBasicMaterial({ color: 0xf5f5f5 }))); }
+    }
     // apuntar
     tmpM.identity().extractRotation(h.ctrl.matrixWorld);
     raycaster.ray.origin.setFromMatrixPosition(h.ctrl.matrixWorld); raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tmpM);
@@ -807,7 +874,7 @@ function updateXRInput(dt) {
     h.hover = hit ? hit.object : null; if (hit && !hoverId) { hoverId = hit.object.userData.hoverId; hoverHand = h.hand; }
     const hi = hands.indexOf(h);
     if (app.state === "ambiente" && !hit) { const v = vozAt(raycaster.ray.origin, vozDir.copy(raycaster.ray.direction)); if (v !== h.voz) { h.voz = v; if (v) tocarVoz(v, h.hand); } } else h.voz = null;   // señalar una voz del modelo
-    h.ctrl.getWorldPosition(hp); panTouch(hi, h.hand, hp, dt);
+    handPos(h, hp); panTouch(hi, h.hand, hp, dt);
     if (h.grab && app.state === "lobby") {                  // gatillo sostenido: tu mano gira el mundo alrededor de ti
       const ga = Math.atan2(hp.x, -hp.z), da = wrapPi(ga - h.grab.a), k = TUNING.giroRatio ?? 2; h.grab.a = ga; h.grab.moved += Math.abs(da);
       NAV.angle -= da * k; NAV.vel = lerp(NAV.vel, (-da * k) / Math.max(dt, 0.008), 0.35); NAV.target = null; NAV.settled = null;
@@ -815,10 +882,10 @@ function updateXRInput(dt) {
     } else if (h.grab) h.grab = null;
     if (!h.grab && !h.grip && !NAV.touch[hi] && pan.visible && (app.state !== "lobby" || NAV.settled !== null)) {   // faro: guía la mano hacia el botón central del aro
       const dc = pan.localToWorld(hp2.set(0, 0, -PAN_RF)).distanceTo(hp), now = performance.now();
-      if (dc < 0.25 && now - (h.beaconAt || 0) > lerp(110, 520, dc / 0.25)) { h.beaconAt = now; haptics.play(h.hand, "faro", 0.6 + 0.8 * (1 - dc / 0.25)); }
+      if (dc < 0.25 && now - (h.beaconAt || 0) > lerp(110, 520, dc / 0.25)) { h.beaconAt = now; hx(h.hand, "faro", 0.6 + 0.8 * (1 - dc / 0.25)); }
     }
     if (app.state === "ambiente") {
-      h.ctrl.getWorldPosition(hp); const dl = sphere.worldToLocal(hp2.copy(hp)).length(), Rl = TUNING.sphereRadius;
+      handPos(h, hp); const dl = sphere.worldToLocal(hp2.copy(hp)).length(), Rl = TUNING.sphereRadius;
       if (dl < Rl * 2.2) { setCrush(hi, hp); sphereTouch(hi, h.hand); }   // la mano dentro del campo de la esfera
       else { const sh = raycaster.intersectObject(sphereHit, false)[0]; setCrush(hi, sh ? sh.point : null, true); if (sh) sphereTouch(hi, h.hand); }
     } else setCrush(hi, null);
@@ -845,7 +912,7 @@ function updateXRInput(dt) {
     const h = g[0], a = handAngle(h); let da = a - h.lastAngle; if (da > Math.PI) da -= TAU; if (da < -Math.PI) da += TAU; h.lastAngle = a;
     if (setYear(app.yearPos + (da / TAU) * synth.count, true)) detent(h.hand);
   } else if (g.length === 2 && twoHand) { // dos manos: abrir o cerrar cambia el tamaño = la velocidad
-    g[0].ctrl.getWorldPosition(hp); g[1].ctrl.getWorldPosition(hp2);
+    handPos(g[0], hp); handPos(g[1], hp2);
     const before = app.speed; setScale(twoHand.s0 * (hp.distanceTo(hp2) / twoHand.d0));
     if (before !== app.speed) { hx(null, "tick"); sfx(app.speed > before ? "apertura" : "cierre", { mini: true }); }   // trinquete de velocidad: abrir suena a abrir, cerrar a cerrar
     hp.add(hp2).multiplyScalar(0.5); sphere.worldToLocal(hp); if (hp.lengthSq() > 1e-8) KS.expandDir.lerp(hp.normalize(), 0.2).normalize();   // la región se abre hacia las manos
@@ -912,7 +979,7 @@ function applyLang() {
     sinxr: tx("Este navegador no tiene WebXR: usa la versión de pantalla, o el navegador del visor.", "This browser has no WebXR: use the screen version, or the headset's browser."), error: tx("No se pudo entrar a VR: ", "Could not enter VR: ") + estadoExtra }[estadoKey]);
   for (const p of panels) p.redraw();
 }
-function setLang(l) { app.lang = l; VOZ.pending = ""; VOZ.token++; if (window.speechSynthesis) speechSynthesis.cancel(); try { localStorage.setItem("orbis-lang", l); } catch (e) { /* sin almacenamiento: vale para esta visita */ } if (typeof INTRO !== "undefined") INTRO.subText = ""; applyLang(); sfx("confirmacion"); }
+function setLang(l) { app.lang = l; VOZ.pending = ""; VOZ.token++; narrStop(); if (app.desc) narrLoad(); if (window.speechSynthesis) speechSynthesis.cancel(); try { localStorage.setItem("orbis-lang", l); } catch (e) { /* sin almacenamiento: vale para esta visita */ } if (typeof INTRO !== "undefined") INTRO.subText = ""; applyLang(); sfx("confirmacion"); }
 /* ---------- pantalla de carga "Amanecer": el borde de un mundo oscuro se enciende con la carga, del centro hacia los lados; cada
    ambiente deja su marca de color sobre el horizonte. "Orbe" aparece letra por letra con la ola del leitmotiv y salta con el acorde. ---------- */
 const INTRO = { group: null, letters: [], strips: [], marks: [], rim: null, disc: null, sub: null, subText: "", t0: 0, hit: false, word: "Orbe", R: 2.0, top: -0.44, half: 1.2, seg: 120 };
@@ -964,8 +1031,24 @@ function introSub(text) {
   g.clearRect(0, 0, w, h); g.font = `500 34px ${FONT}`; g.textAlign = "center"; g.fillStyle = N.muted; g.fillText(text, w / 2, 52); tex.needsUpdate = true;
 }
 function updateIntro() {
-  const T = synth.ctx ? synth.ctx.currentTime - INTRO.t0 : 99, grp = INTRO.group, ss = (x) => { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); };
-  if (T < 0.6) { camera.getWorldPosition(hp2); grp.position.set(hp2.x, hp2.y, hp2.z - 1.7); }             // a la altura de tus ojos
+  if (INTRO.pending) {
+    // En el visor, entrar a VR tarda (transición del navegador, permisos, ponerte el visor). La intro y el leitmotiv esperan a que haya
+    // imagen estable: sesión visible, cabeza con pose y mundo ya orientado hacia ti. Tope de 8 s por si el visor no avisa.
+    const ses = renderer.xr.getSession(), now = performance.now(), ok = !app.xr || (!!xrFrame && !recenterAsk && (!ses || ses.visibilityState === "visible"));
+    if (!ok) INTRO.readyAt = 0; else if (!INTRO.readyAt) INTRO.readyAt = now;
+    if ((ok && now - INTRO.readyAt > (app.xr ? 900 : 150)) || now - INTRO.askedAt > 8000) {
+      INTRO.pending = false; INTRO.t0 = synth.ctx.currentTime + 0.35;
+      const lm = LEITMOTIV[TUNING.leitmotiv];                // la firma sonora: va directa a la salida, sincronizada con las letras
+      if (lm) { try { const g = synth.ctx.createGain(); g.gain.value = 0.72; g.connect(synth.ctx.destination); lm.play(synth.ctx, g, INTRO.t0); } catch (e) { /* sin leitmotiv: la carga sigue */ } }
+    }
+  }
+  const T = INTRO.pending ? -1 : synth.ctx ? synth.ctx.currentTime - INTRO.t0 : 99, grp = INTRO.group, ss = (x) => { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); };
+  { // siempre frente a ti y a la altura de tus ojos: se coloca al empezar y después sigue a la cabeza con suavidad (en el visor no se pierde si giras)
+    camera.getWorldPosition(hp2); camera.getWorldDirection(tmpV); const first = T < 0.3 || INTRO.yaw === undefined;
+    if (Math.hypot(tmpV.x, tmpV.z) > 0.3) { const ty = Math.atan2(-tmpV.x, -tmpV.z); INTRO.yaw = first ? ty : INTRO.yaw + wrapPi(ty - INTRO.yaw) * 0.04; }
+    const yw = INTRO.yaw || 0; tmpS.set(hp2.x - Math.sin(yw) * 1.7, hp2.y, hp2.z - Math.cos(yw) * 1.7);
+    if (first) grp.position.copy(tmpS); else grp.position.lerp(tmpS, 0.06); grp.rotation.y = yw;
+  }
   const out = 1 - ss((T - 5.4) / 1.1), fadeIn = ss(T / 0.6), hitK = T > 1.85 ? Math.exp(-(T - 1.85) * 4) : 0;
   const p = Math.min(clamp(T / 3.5, 0, 1), 0.12 + 0.88 * (LOAD.total ? LOAD.done / LOAD.total : 1));       // la carga real manda si va más lenta que la música
   if (T > 1.85 && !INTRO.hit) { INTRO.hit = true; hx(null, "diente"); }                                   // la ola rompe: un solo toque
@@ -999,22 +1082,21 @@ function endIntro() {
 }
 async function begin(vr) {
   app.desc = !!($("descripciones") && $("descripciones").checked);
-  descBtn.redraw();
+  descBtn.redraw(); if (app.desc) narrLoad();
   synth.level = 0; if (synth.nodes) synth.nodes.master.gain.value = 0;                                    // nada suena hasta que termina la carga
   await synth.play();
   if (vr) {
     try {
-      const session = await navigator.xr.requestSession("immersive-vr", { optionalFeatures: ["local-floor", "bounded-floor"] });
+      const session = await navigator.xr.requestSession("immersive-vr", { optionalFeatures: ["local-floor", "bounded-floor", "hand-tracking"] });
       await renderer.xr.setSession(session); app.xr = true; haptics.setSources(session);
       session.addEventListener("inputsourceschange", () => haptics.setSources(session));
-      session.addEventListener("end", () => { app.xr = false; $("inicio").hidden = false; synth.stop(); app.state = "inicio"; if (INTRO.group) INTRO.group.visible = false; scene.background.setHex(0x080808); show(); });
+      session.addEventListener("end", () => { app.xr = false; $("inicio").hidden = false; synth.stop(); app.state = "inicio"; baseRef = null; xrFrame = null; try { renderer.xr.setReferenceSpace(null); } catch (e) { /* nada que restablecer */ } if (INTRO.group) INTRO.group.visible = false; scene.background.setHex(0x080808); show(); });
     } catch (e) { estadoKey = "error"; estadoExtra = e.message; applyLang(); app.xr = false; }
   }
   $("inicio").hidden = true; $("ayuda").hidden = true; yaw = 0; pitch = 0;
-  buildIntro(); INTRO.group.visible = true; INTRO.hit = false; scene.background.setHex(0x000000); INTRO.letters.forEach((m) => (m.material.opacity = 0));
-  app.state = "intro"; show(); INTRO.t0 = synth.ctx.currentTime + (vr ? 0.9 : 0.35);                      // en el visor, un respiro para que la imagen llegue antes que el sonido
-  const lm = LEITMOTIV[TUNING.leitmotiv];                  // la firma sonora: va directa a la salida, sincronizada con las letras
-  if (lm) { try { const g = synth.ctx.createGain(); g.gain.value = 0.72; g.connect(synth.ctx.destination); lm.play(synth.ctx, g, INTRO.t0); } catch (e) { /* sin leitmotiv: la carga sigue */ } }
+  buildIntro(); INTRO.group.visible = true; INTRO.hit = false; INTRO.yaw = undefined; scene.background.setHex(0x000000); INTRO.letters.forEach((m) => (m.material.opacity = 0));
+  app.state = "intro"; baseRef = null; recenter(); show();
+  INTRO.pending = true; INTRO.readyAt = 0; INTRO.askedAt = performance.now(); INTRO.t0 = Infinity;   // el reloj de la intro no corre hasta que de verdad la estás viendo
 }
 $("pantalla").addEventListener("click", () => begin(false));
 $("vr").addEventListener("click", () => begin(true));
@@ -1028,7 +1110,8 @@ window.addEventListener("resize", () => { camera.aspect = window.innerWidth / wi
 /* ---------- cuadro ---------- */
 const clock = new THREE.Clock();
 show(); gLobby.visible = false; gAmb.visible = false;
-renderer.setAnimationLoop(() => {
+renderer.setAnimationLoop((_time, frame) => {
+  xrFrame = frame || null; doRecenter();
   const dt = Math.min(0.05, clock.getDelta()), t = clock.elapsedTime;
   if (!app.xr) { camera.rotation.y = -yaw; camera.rotation.x = -pitch; }
   if (app.state === "intro") updateIntro();

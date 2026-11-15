@@ -249,7 +249,8 @@ export class NucleoSynth {
         }
         if (dv > 0.6 && stepOf % 8 === 4) bell(this._warm(hz, 1760) * (low < hz * 0.99 ? 1 : 2), t, 1.3, peak * 0.3 * ((dv - 0.6) / 0.4), 0);   // campana: se va con la diversidad
       }
-      if (place === "gases") { const a = this._tone("sine", t, dur * 0.7, -0.2); a.osc.frequency.setValueAtTime(hz * 4, t); this._env(a.g, t, 0.035 * vel, 0.006, dur * 0.7); }
+      if (this.rich && place === "gases") this._gasFx(vc, hz, idx, t, stepOf, vel);
+      if (place === "gases" && !this.rich) { const a = this._tone("sine", t, dur * 0.7, -0.2); a.osc.frequency.setValueAtTime(hz * 4, t); this._env(a.g, t, 0.035 * vel, 0.006, dur * 0.7); }
       if (place === "hielo") { const b = this._tone("sine", t, dur * 0.6, 0.3); b.osc.frequency.setValueAtTime(Math.min(hz * 2.76, 9000), t); this._env(b.g, t, 0.05 * vel, 0.003, dur * 0.6); }
     } else if (vc.id === "pulso") {
       const stepSec = 60 / d.tempo / 4, dur = vc.amHz ? stepSec * 0.85 : 0.03;
@@ -284,6 +285,57 @@ export class NucleoSynth {
       }
     }
   }
+  /** Gases · efectos de la melodía, todos dentro de la escala: coro con trémolo (el aire vibra más rápido con la presión),
+      vapor (la nota sube por la escala en ecos que se abren a los lados; se adelgaza con la vitalidad) y peso (una nota grave
+      y lenta que aparece cuando el gas se acumula). */
+  _gasFx(vc, hz, idx, t, stepOf, vel) {
+    const d = this.derived, ctx = this.ctx, cl = (x) => Math.max(0, Math.min(1, x)), v = cl(d.v ?? 1), p = cl(d.p ?? 0), beat = 60 / d.tempo, peak = 0.22 * vel;
+    for (const c of [-6, 6]) {
+      const x = this._tone("sine", t, 0.75, c < 0 ? -0.55 : 0.55, true), pk = peak * 0.26;
+      x.osc.frequency.setValueAtTime(hz * Math.pow(2, c / 1200), t);
+      x.g.gain.setValueAtTime(0.0001, t); x.g.gain.linearRampToValueAtTime(pk, t + 0.09); x.g.gain.exponentialRampToValueAtTime(0.0001, t + 0.75);
+      const am = ctx.createOscillator(), amG = ctx.createGain(); am.frequency.value = 3 + 5 * p + (c > 0 ? 0.4 : 0);
+      amG.gain.setValueAtTime(0, t); amG.gain.linearRampToValueAtTime(pk * 0.4, t + 0.2); amG.gain.linearRampToValueAtTime(0, t + 0.65);
+      am.connect(amG); amG.connect(x.g.gain); am.start(t); am.stop(t + 0.8);
+    }
+    if (stepOf % 2 === 0) {
+      const n = v > 0.6 ? 3 : v > 0.3 ? 2 : 1;
+      for (let k = 1; k <= n; k++) {
+        const j = idx + 2 * k; let f = C.midiHz(vc.rootMidi + PENTA[j % 5] + 12 * Math.floor(j / 5)); while (f > 2100) f /= 2;
+        const tt = t + k * beat * 0.25, x = this._tone("sine", tt, 0.9, (k % 2 ? 1 : -1) * (0.3 + 0.2 * k), true);
+        x.osc.frequency.setValueAtTime(this._tuned(f), tt); this._env(x.g, tt, peak * 0.3 * Math.pow(0.7, k) * (0.35 + 0.65 * v), 0.03, 0.9);
+      }
+    }
+    if (p > 0.35 && stepOf % 8 === 0) {
+      let f = hz; while (f > 200) f /= 2;
+      const x = this._tone("triangle", t, 2.2, 0), pk = (peak * 0.45 * (p - 0.35)) / 0.65; x.osc.frequency.setValueAtTime(f, t);
+      x.g.gain.setValueAtTime(0.0001, t); x.g.gain.linearRampToValueAtTime(pk, t + 0.7); x.g.gain.exponentialRampToValueAtTime(0.0001, t + 2.2);
+    }
+  }
+  /** Gases · respiración: cada dos compases un acorde de la escala se abre y se cierra con un filtro, y cruza de un lado al otro.
+      Con vitalidad se abre brillante y lleva la tercera mayor; al final se abre poco y queda hueco. */
+  _gasSwell(t) {
+    const d = this.derived, ctx = this.ctx, v = Math.max(0, Math.min(1, d.v ?? 1)), dur = (60 / d.tempo) * 8 * 0.95, root = this._padRoot() * 2, side = (this.bar / 2) % 2 ? 1 : -1;
+    const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.Q.value = 3.5;
+    lp.frequency.setValueAtTime(240, t); lp.frequency.exponentialRampToValueAtTime(480 + 1900 * v, t + dur * 0.5); lp.frequency.exponentialRampToValueAtTime(240, t + dur);
+    const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.02, t + dur * 0.45); g.gain.linearRampToValueAtTime(0.0001, t + dur);
+    lp.connect(g);
+    if (ctx.createStereoPanner) { const pn = ctx.createStereoPanner(); pn.pan.setValueAtTime(-0.6 * side, t); pn.pan.linearRampToValueAtTime(0.6 * side, t + dur); g.connect(pn); pn.connect(this.nodes.bioIn); } else g.connect(this.nodes.bioIn);
+    [1, 1.5, v > 0.5 ? 2 * Math.pow(2, 4 / 12) : 2].forEach((m, i) => { const o = ctx.createOscillator(), og = ctx.createGain(); o.type = "sawtooth"; o.frequency.value = root * m; o.detune.value = (i - 1) * 4; og.gain.value = i ? 0.3 : 0.45; o.connect(og); og.connect(lp); o.start(t); o.stop(t + dur + 0.05); });
+  }
+  /** Jungla · capas, todas en la escala del lugar: marimba grave (el suelo), gotas (plinks con eco), grillos afinados y una
+      respuesta al canto desde el lado contrario. Gotas y grillos se van con la diversidad; la respuesta, con la vitalidad.
+      Al final queda la marimba casi sola. */
+  _jungleFx(s, t) {
+    const d = this.derived, cl = (x) => Math.max(0, Math.min(1, x)), v = cl(d.v ?? 1), dv = cl(d.d ?? 1), vel = d.velocity, root = this._rootMidi(), step = 60 / d.tempo / 4;
+    const hz = (deg, oct) => this._tuned(C.midiHz(root + PENTA[((deg % 5) + 5) % 5] + 12 * (Math.floor(deg / 5) + oct)));
+    const note = (type, f, tt, len, pk, pan, echo, att = 0.004) => { const x = this._tone(type, tt, len, pan, echo); x.osc.frequency.setValueAtTime(f, tt); this._env(x.g, tt, pk, att, len); };
+    const mar = { 0: 0, 6: 2, 10: 1, 14: 3 }[s];
+    if (mar !== undefined && (s !== 14 || v > 0.5)) { note("triangle", hz(mar, -4), t, 0.34, 0.085 * vel, s === 0 ? 0 : s === 6 ? -0.3 : 0.3, false); note("sine", hz(mar, -3), t, 0.12, 0.03 * vel, 0, true); }
+    if (s % 2 === 1 && C.hash01(this.bar * 16 + s + 1, 3) < 0.22 * dv) note("sine", hz(Math.floor(C.hash01(this.bar + 1, s + 5) * 7), -2), t, 0.5, 0.034 * vel, C.hash01(s + 1, this.bar + 2) * 1.8 - 0.9, true);
+    if (s % 4 === 2 && dv > 0.4) { const side = (s === 2 || s === 10 ? -1 : 1) * 0.85, f = hz(s % 8 === 2 ? 0 : 2, -1); for (let k = 0; k < 3; k++) note("sine", f, t + k * 0.045, 0.035, 0.011 * ((dv - 0.4) / 0.6), side, false, 0.003); }
+    if (this.bar % 2 === 1 && s === 4 && v > 0.45) { const pan = ((this.bar - 1) / 2) % 2 === 0 ? 0.7 : -0.7; [2, 3, 4].forEach((dg, k) => note("sine", hz(dg, -2), t + k * step * 1.5, 0.3, 0.07 * vel * ((v - 0.45) / 0.55), pan, true, 0.02)); }
+  }
   _machineTick(t) {
     if (this.rich) return;
     const osc = this.ctx.createOscillator(), g = this.ctx.createGain();
@@ -296,6 +348,8 @@ export class NucleoSynth {
     const d = this.derived;
     for (const vc of d.voices) if (vc.active && vc.alive[s]) this._voice(vc, t, s);
     if (s % 4 === 0 && d.p > 0.04 && C.pressureOf(this.preset.signature).type === "machine") this._machineTick(t);
+    if (this.rich && s === 0 && this.bar % 2 === 0 && this.preset.signature === "gases") this._gasSwell(t);
+    if (this.rich && this.preset.signature === "jungla") this._jungleFx(s, t);
     if (this.onStep) this.onStep(s, t, d, this.reference);
   }
   _pump() {

@@ -44,8 +44,9 @@ export const TUNING = {
   platformLift: 1.4,       // metros que flota la plataforma sobre el piso del lugar (0 = sin flotar)
   introBars: 2,            // compases del lugar intacto antes de que corra el tiempo
   sphereCenter: [0, 1.38, -0.7],   // la altura real se ajusta al entrar: ojos − sphereBelowEyes
-  sphereBelowEyes: 0.22,           // metros por debajo de los ojos (interfaz de navegación a la vista)
+  sphereBelowEyes: 0.42,           // metros por debajo de los ojos (interfaz de navegación a la vista)
   sphereRadius: 0.2,
+  sphereVolume: 2,                 // volumen de los sonidos de la esfera (tocarla y avanzar el año); 1 = como antes
   pauseBelowScale: 0.75,   // esfera más chica que esto: el tiempo se detiene
   maxScale: 2.2,
   maxYearsPerBar: 4,
@@ -53,6 +54,7 @@ export const TUNING = {
   vibrarMelodia: false,    // true: un toque leve al inicio de cada compás. Por defecto la música no vibra.
   giroRatio: 2,            // lobby con gatillo sostenido: 1° de tu mano = 2° del mundo (60° de mano llevan al siguiente lugar)
   sonidoRico: true,        // música de los lugares enriquecida (espacio, eco, lecho armónico, voces más cálidas). false = el sonido original.
+  lobbyLevel: 0.16,        // volumen de la música en el lobby (antes 0.35): la antesala es callada
   leitmotiv: "marea",      // firma sonora al entrar: "orbita", "pulso", "marea", "senal" o "" para ninguna (ver src/sfx.js)
   diagnostico: true        // muestra bajo "Elige un lugar" si hay VR, qué mandos ve y si pueden vibrar. Ponlo en false para la demo.
 };

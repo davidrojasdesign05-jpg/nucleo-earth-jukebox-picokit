@@ -27,6 +27,13 @@ function breath(ctx, dest, t, { dur = 0.6, gain = 0.03, f0 = 400, f1 = 3000, q =
 
 /* Sonidos de interfaz. Cortos y suaves: acompañan, no compiten con la música del dato. */
 export const SFX = {
+  /** Invitación a girar (lobby en reposo): tres campanas que suben y se van hacia un lado, con un soplo que las sigue. dir = -1 izquierda, 1 derecha. */
+  invitar(ctx, dest, t, { dir = 1 } = {}) {
+    const at = (pan) => { const g = ctx.createGain(); if (ctx.createStereoPanner) { const pn = ctx.createStereoPanner(); pn.pan.value = pan; g.connect(pn); pn.connect(dest); } else g.connect(dest); return g; };
+    [[NOTE.D4, 0.1], [NOTE.A4, 0.5], [NOTE.D5, 0.95]].forEach(([hz, pan], i) => tone(ctx, at(pan * dir), hz, t + i * 0.24, { attack: 0.01, decay: 1.3, gain: 0.03, partials: [[1, 1], [2, 0.25]] }));
+    const sw = ctx.createGain(); if (ctx.createStereoPanner) { const pn = ctx.createStereoPanner(); pn.pan.setValueAtTime(0, t); pn.pan.linearRampToValueAtTime(dir, t + 0.9); sw.connect(pn); pn.connect(dest); } else sw.connect(dest);
+    breath(ctx, sw, t, { dur: 1.0, gain: 0.012, f0: 500, f1: 2400, attack: 0.5, q: 1.5 });
+  },
   /** Apertura: algo se abre o aparece (la isla del dato, las descripciones). Soplo que sube y una quinta ascendente. */
   apertura(ctx, dest, t, { mini = false } = {}) {
     if (mini) { tone(ctx, dest, NOTE.D4, t, { decay: 0.16, gain: 0.02, partials: [[1, 1], [2, 0.2]] }); tone(ctx, dest, NOTE.A4, t + 0.06, { decay: 0.2, gain: 0.02, partials: [[1, 1], [2, 0.2]] }); return; }   // mini: abrir las manos
@@ -74,26 +81,44 @@ export const LEITMOTIV = {
     },
   },
   marea: {
-    name: "Marea", desc: "Una ola que crece desde lo muy grave, rompe con un golpe profundo y deja tres notas que bajan (fa, mi, re) con eco. Lenta, con peso.",
+    name: "Marea", desc: "Una ola que cruza de un oído al otro desde lo muy grave, rompe con un golpe profundo y abre en re mayor: cuatro notas que suben (re, fa♯, la, re) repartidas a los lados, un acorde luminoso y destellos que se alejan.",
     play(ctx, dest, t) {
-      // espacio: una línea de eco con realimentación da la profundidad
+      // espacio: eco que rebota de un lado al otro
       const bus = ctx.createGain(); bus.connect(dest);
-      const dl = ctx.createDelay(1.0), fb = ctx.createGain(), lp = ctx.createBiquadFilter(), wet = ctx.createGain();
-      dl.delayTime.value = 0.36; fb.gain.value = 0.5; lp.type = "lowpass"; lp.frequency.value = 1600; wet.gain.value = 0.55;
-      bus.connect(dl); dl.connect(lp); lp.connect(fb); fb.connect(dl); lp.connect(wet); wet.connect(dest);
-      // la ola: un soplo largo que sube desde lo grave, sobre un re muy bajo y su quinta
-      breath(ctx, bus, t, { dur: 3.0, gain: 0.04, f0: 90, f1: 2200, attack: 0.62, q: 0.6 });
-      tone(ctx, bus, NOTE.D2 / 2, t, { attack: 1.6, decay: 3.4, gain: 0.07, partials: [[1, 1], [2, 0.5]] });
-      tone(ctx, bus, NOTE.D3, t, { attack: 1.5, decay: 3.2, gain: 0.034, partials: [[1, 1], [2, 0.25]] });
-      tone(ctx, bus, NOTE.A3, t, { attack: 1.5, decay: 3.2, gain: 0.026, partials: [[1, 1], [2, 0.2]] });
-      // el impacto: la ola rompe
+      const dL = ctx.createDelay(1.0), dR = ctx.createDelay(1.0), fb = ctx.createGain(), lp = ctx.createBiquadFilter(), wet = ctx.createGain(), mix = ctx.createChannelMerger(2), send = ctx.createGain();
+      dL.delayTime.value = 0.31; dR.delayTime.value = 0.31; fb.gain.value = 0.42; lp.type = "lowpass"; lp.frequency.value = 2200; wet.gain.value = 0.5;
+      send.connect(dL); dL.connect(lp); lp.connect(dR); dR.connect(fb); fb.connect(dL); lp.connect(mix, 0, 0); dR.connect(mix, 0, 1); mix.connect(wet); wet.connect(dest);
+      /** Salida colocada en el estéreo; si se da "to", viaja hasta ahí en "dur" segundos desde "at". echo: cuánto va al eco. */
+      const out = (pan, { to, at = t, dur = 1, echo = 0.5 } = {}) => {
+        const g = ctx.createGain(); if (echo) { const e = ctx.createGain(); e.gain.value = echo; g.connect(e); e.connect(send); }
+        if (ctx.createStereoPanner) { const pn = ctx.createStereoPanner(); pn.pan.setValueAtTime(pan, at); if (to !== undefined) pn.pan.linearRampToValueAtTime(to, at + dur); g.connect(pn); pn.connect(bus); } else g.connect(bus);
+        return g;
+      };
+      const Fs3 = 185.0, Fs4 = 369.99, D6 = 1174.66, Fs6 = 1479.98;
+      // la ola: el soplo cruza de izquierda a derecha sobre un re muy grave; la quinta y la tercera mayor esperan a los lados
+      breath(ctx, out(-0.95, { to: 0.95, dur: 2.0, echo: 0.2 }), t, { dur: 2.6, gain: 0.045, f0: 90, f1: 2600, attack: 0.66, q: 0.6 });
+      tone(ctx, out(0, { echo: 0 }), NOTE.D2 / 2, t, { attack: 1.6, decay: 3.2, gain: 0.1, partials: [[1, 1], [2, 0.55], [3, 0.12]] });
+      tone(ctx, out(-0.7), NOTE.A2, t, { attack: 1.5, decay: 3.0, gain: 0.034, partials: [[1, 1], [2, 0.25]] });
+      tone(ctx, out(0.7), Fs3, t, { attack: 1.5, decay: 3.0, gain: 0.028, partials: [[1, 1], [2, 0.2]] });
+      // el impacto: la ola rompe, con cuerpo en el grave y espuma a los dos lados
       const hit = t + 1.85;
-      tone(ctx, bus, NOTE.D2, hit, { attack: 0.006, decay: 1.6, gain: 0.2, partials: [[1, 1], [2, 0.3]], glideTo: 36.7 });
-      breath(ctx, bus, hit, { dur: 0.9, gain: 0.06, f0: 3200, f1: 160, attack: 0.03, q: 0.5 });
-      // la melodía: fa, mi, re, doblada una octava arriba, y un re grave que cierra
-      [NOTE.F4, NOTE.E4, NOTE.D4].forEach((hz, i) => { tone(ctx, bus, hz, hit + 0.1 + i * 0.55, { decay: 1.9, gain: 0.05 }); tone(ctx, bus, hz * 2, hit + 0.1 + i * 0.55, { decay: 1.3, gain: 0.014, partials: [[1, 1]] }); });
-      tone(ctx, bus, NOTE.D2, hit + 1.75, { attack: 0.02, decay: 2.6, gain: 0.09, partials: [[1, 1], [2, 0.4], [3, 0.1]] });
-      return 6.5;
+      tone(ctx, out(0, { echo: 0.15 }), NOTE.D2, hit, { attack: 0.005, decay: 1.8, gain: 0.26, partials: [[1, 1], [2, 0.35], [3, 0.08]], glideTo: 36.7 });
+      tone(ctx, out(0, { echo: 0 }), 58, hit, { attack: 0.004, decay: 0.5, gain: 0.2, partials: [[1, 1]], glideTo: 30 });
+      breath(ctx, out(-0.2, { to: -1, at: hit, dur: 0.9, echo: 0.3 }), hit, { dur: 1.0, gain: 0.05, f0: 3600, f1: 200, attack: 0.03, q: 0.5 });
+      breath(ctx, out(0.2, { to: 1, at: hit, dur: 0.9, echo: 0.3 }), hit, { dur: 1.0, gain: 0.05, f0: 3000, f1: 160, attack: 0.03, q: 0.5 });
+      // la melodía sube en re mayor, alternando lados; cada nota lleva su octava en el lado contrario
+      [[NOTE.D4, -0.65], [Fs4, 0.65], [NOTE.A4, -0.35], [NOTE.D5, 0.2]].forEach(([hz, pan], i) => {
+        const at = hit + 0.12 + i * 0.4;
+        tone(ctx, out(pan), hz, at, { decay: 1.8, gain: 0.06 }); tone(ctx, out(-pan, { echo: 0.7 }), hz * 2, at, { decay: 1.2, gain: 0.016, partials: [[1, 1]] });
+      });
+      // llegada: acorde de re mayor abierto, con un bajo que lo sostiene
+      const fin = hit + 0.12 + 4 * 0.4;
+      tone(ctx, out(0, { echo: 0 }), NOTE.D2, fin, { attack: 0.02, decay: 3.2, gain: 0.13, partials: [[1, 1], [2, 0.45], [3, 0.12]] });
+      tone(ctx, out(0, { echo: 0 }), NOTE.D2 / 2, fin, { attack: 0.05, decay: 3.0, gain: 0.09, partials: [[1, 1]] });
+      [[NOTE.D3, -0.5, 0.045], [NOTE.A3, 0.5, 0.04], [Fs4, -0.3, 0.036], [NOTE.A4, 0.3, 0.03], [NOTE.D5, 0, 0.034]].forEach(([hz, pan, gain]) => tone(ctx, out(pan), hz, fin, { attack: 0.03, decay: 3.0, gain, partials: [[1, 1], [2, 0.3]] }));
+      // destellos que se alejan, muy a los lados
+      [[NOTE.A5, -0.95], [D6, 0.95], [Fs6, -0.8]].forEach(([hz, pan], i) => tone(ctx, out(pan, { echo: 0.9 }), hz, fin + 0.45 + i * 0.3, { attack: 0.004, decay: 1.1, gain: 0.012, partials: [[1, 1]] }));
+      return 7.4;
     },
   },
   senal: {

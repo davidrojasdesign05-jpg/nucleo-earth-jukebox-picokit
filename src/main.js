@@ -40,7 +40,8 @@ const hx = (hand, name, scale) => { if (hand) haptics.play(hand, name, scale); e
 const app = { state: "inicio", info: false, desc: false, dash: "hielo", yearPos: 0, scale: 1, speed: 1, scrubbing: false, sensory: false, uiAlpha: 1, hover: null, xr: false, beat: 0 };
 window.__nucleo = { app, synth, haptics };
 /** Sonido de interfaz (ver src/sfx.js): apertura, cierre, transicion, giro, confirmacion, avance. */
-function sfx(name, opts) { const ctx = synth.ctx; if (!ctx || ctx.state !== "running" || !synth.nodes) return; try { SFX[name](ctx, synth.nodes.master, ctx.currentTime, opts); } catch (e) { /* sin sonido de interfaz: la experiencia sigue */ } }
+let inviteAt = Infinity, inviteDir = -1;
+function sfx(name, opts) { const ctx = synth.ctx; if (!ctx || ctx.state !== "running" || !synth.nodes) return; try { const out = ctx.createGain(); out.gain.value = Math.min(4, 0.5 / Math.max(0.05, synth.level)) * ((opts && opts.vol) || 1); out.connect(synth.nodes.master); SFX[name](ctx, out, ctx.currentTime, opts); }   /* los sonidos de apoyo no bajan aunque la sala esté callada */ catch (e) { /* sin sonido de interfaz: la experiencia sigue */ } }
 
 /* ---------- interfaz que se puede atenuar (modo sensorial) ---------- */
 const uiMats = [];
@@ -295,7 +296,12 @@ function buildSphereData(id) {
   ys.forEach((y, j) => { KS.val[j + 1] = norm(y.value); KS.pre[j + 1] = pre(y, KS.val[j + 1]); });
   KS.dash = id;
 }
-const ksCam = new THREE.Vector3(), RAMP = [[0.52, 0.36, 0.92], [1.0, 0.4, 0.34], [1.0, 0.8, 0.36]], PENTA = [0, 2, 4, 7, 9];
+/* Cada esfera habla de su dato:
+   gases  · CO₂ que se acumula: los módulos crecen, se calientan de color y la esfera se infla.
+   hielo  · extensión del hielo: un casquete blanco que baja desde el polo hasta donde llegó el hielo ese año; debajo, agua oscura.
+   jungla · km² talados ese año: esa proporción de módulos cae a tocón ocre; el resto queda en pie, verde. */
+const RAMPS = { gases: [[0.52, 0.36, 0.92], [1.0, 0.4, 0.34], [1.0, 0.8, 0.36]], hielo: [[0.06, 0.14, 0.42], [0.25, 0.6, 1.0], [0.9, 0.97, 1.0]], jungla: [[0.04, 0.42, 0.22], [0.1, 0.66, 0.34], [0.24, 1.0, 0.6]] };
+const ksCam = new THREE.Vector3(), RAMP = RAMPS.gases, PENTA = [0, 2, 4, 7, 9];
 /** Punto (en mundo) que toca la esfera → coordenadas del .blend. i = 0 o 1 (una por mano). null lo suelta. */
 function setCrush(i, world, onSurface = false) {
   if (!world) { KS.crush[i] = null; KS.lastTouch[i] = -1; return; }
@@ -308,7 +314,7 @@ function sphereTouch(i, hand) {
   const j = Math.min(synth.count, Math.round(((Math.atan2(c.x, c.z) / TAU + 1) % 1) * synth.count)), v = KS.val[j];
   if (j !== KS.lastTouch[i]) {
     KS.lastTouch[i] = j; const now = performance.now();
-    if (now - KS.lastSound > 90) { KS.lastSound = now; const deg = Math.round(v * 9); synth.tick(220 * Math.pow(2, (PENTA[deg % 5] + 12 * Math.floor(deg / 5)) / 12), 0.022); }
+    if (now - KS.lastSound > 90) { KS.lastSound = now; const deg = Math.round(v * 9); synth.tick(220 * Math.pow(2, (PENTA[deg % 5] + 12 * Math.floor(deg / 5)) / 12), 0.04 * (TUNING.sphereVolume ?? 2)); }
     if (hand) haptics.play(hand, "anio", 0.6 + 1.2 * v);       // leer el dato con la mano: más alto, más firme
   }
   return v;
@@ -320,12 +326,16 @@ function updateKinetic(dt, d) {
   KS.expand = lerp(KS.expand, clamp((app.scale - 1) / (TUNING.maxScale - 1), 0, 1), 0.12);
   if (!twoHand) { sphere.worldToLocal(camera.getWorldPosition(ksCam)); KS.expandDir.lerp(ksCam.normalize(), 0.1).normalize(); }
   const ea = KS.expand, ex = KS.expandDir.x * Rb, ey = KS.expandDir.y * Rb, ez = KS.expandDir.z * Rb, c0 = KS.crush[0], c1 = KS.crush[1];
-  const ease = Math.min(1, dt * 8), now = app.yearPos, beat = app.beat;
+  const ease = Math.min(1, dt * 8), now = app.yearPos, beat = app.beat, mode = RAMPS[KS.dash] ? KS.dash : "gases", RM = RAMPS[mode];
+  const rnd = KS.rnd || (KS.rnd = Float32Array.from({ length: n }, (_, i) => { const x = Math.sin(i * 12.9898 + 4.1) * 43758.5453; return x - Math.floor(x); }));
   for (let i = 0; i < n; i++) {
     const i3 = i * 3, nx = N[i3], ny = N[i3 + 1], nz = N[i3 + 2], px = nx * Rb, py = ny * Rb, pz = nz * Rb;
     const yf = fr[i] * cnt, j0 = Math.floor(yf), j1 = Math.min(cnt, j0 + 1), t = yf - j0, v = lerp(val[j0], val[j1], t), pr = clamp(0.5 * lerp(pre[j0], pre[j1], t) + 0.5 * (v - 0.12) / 0.88, 0, 1);   // color: presión y dato a partes iguales
     const shown = yf <= now + 0.5, dc = Math.abs(yf - now), cur = dc < 0.75 ? 1 - dc / 0.75 : 0;     // lo ocurrido · el año que suena
-    let h = shown ? (0.35 + v * 2.4) * (0.6 + 0.4 * lat[i]) * (1 + cur * (0.15 + beat * 0.5)) : 0.22, sxy = shown ? 0.85 + v * 0.3 : 0.6, off = 0;
+    const u = (v - 0.12) / 0.88; let hv = v, wv = 1, q = pr, fell = false, latK = 0.6 + 0.4 * lat[i], puff = 0.1 * u;
+    if (mode === "hielo") { const e = clamp((0.16 + 0.78 * u - (1 - ny) / 2) / 0.07, 0, 1); hv = e * (0.35 + 0.4 * u); wv = lerp(0.5, 1, e); q = e * (0.5 + 0.5 * u); latK = 1; puff = 0; }
+    else if (mode === "jungla") { fell = rnd[i] < u * 0.92; hv = fell ? 0 : 0.5 + 0.5 * rnd[(i * 7) % n]; wv = fell ? 0.7 : 1; q = rnd[(i * 13) % n]; puff = 0; }
+    let h = shown ? (0.35 + hv * 2.4) * latK * (1 + cur * (0.15 + beat * 0.5)) : 0.22, sxy = shown ? (0.85 + v * 0.3) * wv : 0.6, off = shown ? puff : 0;
     let w = 1;                                                               // Sphere_Controller: 0 en el centro del toque, 1 fuera de su radio
     if (c0) w = Math.min(w, Math.hypot(c0.x - px, c0.y - py, c0.z - pz) / Rc);
     if (c1) w = Math.min(w, Math.hypot(c1.x - px, c1.y - py, c1.z - pz) / Rc);
@@ -342,8 +352,9 @@ function updateKinetic(dt, d) {
     m[o + 12] = nx * rad; m[o + 13] = ny * rad; m[o + 14] = nz * rad; m[o + 15] = 1;
     let cr = 0.22, cg = 0.22, cb = 0.24;                                     // color: gris si aún no ocurre; si no, la rampa de presión
     if (shown) {
-      const a = pr < 0.5 ? RAMP[0] : RAMP[1], b = pr < 0.5 ? RAMP[1] : RAMP[2], q = pr < 0.5 ? pr * 2 : (pr - 0.5) * 2, wh = Math.min(1, cur * 0.35 + (1 - w) * 0.35);
-      cr = lerp(lerp(a[0], b[0], q), 1, wh); cg = lerp(lerp(a[1], b[1], q), 1, wh); cb = lerp(lerp(a[2], b[2], q), 1, wh);
+      const a = q < 0.5 ? RM[0] : RM[1], b = q < 0.5 ? RM[1] : RM[2], qq = q < 0.5 ? q * 2 : (q - 0.5) * 2, wh = Math.min(1, cur * 0.35 + (1 - w) * 0.35);
+      let r0 = lerp(a[0], b[0], qq), g0 = lerp(a[1], b[1], qq), b0 = lerp(a[2], b[2], qq); if (fell) { r0 = 0.8; g0 = 0.42; b0 = 0.18; }
+      cr = lerp(r0, 1, wh); cg = lerp(g0, 1, wh); cb = lerp(b0, 1, wh);
     }
     col[i3] = lerp(col[i3], cr, ease); col[i3 + 1] = lerp(col[i3 + 1], cg, ease); col[i3 + 2] = lerp(col[i3 + 2], cb, ease);
   }
@@ -478,7 +489,7 @@ function show() {
 function goLobby() {
   if (app.state === "ambiente" || app.state === "fin") sfx("cierre");
   app.state = "lobby"; app.hover = null; setSensory(false); panHeight(); panHint.redraw();
-  synth.setLevel(0.35); show();
+  synth.setLevel(TUNING.lobbyLevel ?? 0.16); show();   // el lobby es la antesala: la música queda al fondo
 }
 function startAmbiente(id) {
   app.dash = id; app.state = "ambiente"; app.yearPos = 0; app.scale = 1; app.speed = 1; app.scrubbing = false; barsHere = 0;
@@ -496,7 +507,7 @@ function setYear(pos, fromUser) {
   const idx = Math.min(n, Math.floor(app.yearPos + 1e-6));
   if (idx !== synth.idx) {
     synth.setIndex(idx); refreshOnsets(); hud.redraw();
-    if (fromUser) { sfx("avance", { pos: idx / n }); return true; }   // detente
+    if (fromUser) { sfx("avance", { vol: TUNING.sphereVolume ?? 2, pos: idx / n }); return true; }   // detente
   }
   return false;
 }
@@ -821,7 +832,7 @@ async function begin(vr) {
   await synth.play();
   const lm = LEITMOTIV[TUNING.leitmotiv];                  // la firma sonora al entrar: va directa a la salida y la música del lobby espera a que termine
   let lmDur = 0;
-  if (lm && synth.ctx) { try { const g = synth.ctx.createGain(); g.gain.value = 0.6; g.connect(synth.ctx.destination); lmDur = lm.play(synth.ctx, g, synth.ctx.currentTime + 0.1) || 0; } catch (e) { lmDur = 0; } }
+  if (lm && synth.ctx) { try { const g = synth.ctx.createGain(); g.gain.value = 0.72; g.connect(synth.ctx.destination); lmDur = lm.play(synth.ctx, g, synth.ctx.currentTime + 0.1) || 0; } catch (e) { lmDur = 0; } }
   if (vr) {
     try {
       const session = await navigator.xr.requestSession("immersive-vr", { optionalFeatures: ["local-floor", "bounded-floor"] });
@@ -831,7 +842,7 @@ async function begin(vr) {
     } catch (e) { $("estado").textContent = "No se pudo entrar a VR: " + e.message; app.xr = false; }
   }
   $("inicio").hidden = true; $("ayuda").hidden = app.xr; goLobby(); yaw = 0; pitch = 0;
-  if (lmDur) { synth.setLevel(0.03); setTimeout(() => { if (app.state === "lobby") synth.setLevel(0.35); }, Math.max(0, lmDur - 1.6) * 1000); }
+  if (lmDur) { synth.setLevel(0.03); setTimeout(() => { if (app.state === "lobby") synth.setLevel(TUNING.lobbyLevel ?? 0.16); }, Math.max(0, lmDur - 1.6) * 1000); }
 }
 $("pantalla").addEventListener("click", () => begin(false));
 $("vr").addEventListener("click", () => begin(true));
@@ -847,6 +858,9 @@ renderer.setAnimationLoop(() => {
   const dt = Math.min(0.05, clock.getDelta()), t = clock.elapsedTime;
   if (!app.xr) { camera.rotation.y = -yaw; camera.rotation.x = -pitch; }
   updateXRInput(dt); updateNav(dt); updateDesc();
+  { const nowI = performance.now();                        // lobby en reposo: una llamada suave te invita a girar, una vez a cada lado
+    if (app.state !== "lobby" || NAV.grab || Math.abs(NAV.vel) > 0.05) inviteAt = nowI + 9000;
+    else if (nowI > inviteAt) { inviteAt = nowI + 12000; inviteDir = -inviteDir; sfx("invitar", { dir: inviteDir }); hx(inviteDir > 0 ? "right" : "left", "tick", 0.9); } }
   {                                                        // roce continuo: el sonido sigue al gesto (girar el mundo, girar la esfera)
     let lv = 0, pn = 0;
     if (app.state === "lobby") { lv = clamp(Math.abs(NAV.vel) / 3.5, 0, 1); pn = clamp(-NAV.vel / 3, -0.7, 0.7); }

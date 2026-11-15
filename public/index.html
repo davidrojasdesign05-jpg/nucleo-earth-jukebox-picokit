@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23121212'/><g transform='translate(14 14) scale(.72)' fill='none' stroke='%23f5f5f5' stroke-width='3.4' stroke-linecap='round'><circle cx='57' cy='50' r='25' fill='%23f5f5f5' stroke='none'/><path d='M38.71 81.01 A33 33 0 0 1 32.51 22.01'/><path d='M56.95 89.39 A40 40 0 1 1 56.95 10.61'/><path d='M86.00 80.21 A47 47 0 1 1 90.70 26.50'/><path d='M36.58 19.85 A33 33 0 0 1 45.41 17.32' stroke='%23ff5a3c' stroke-width='4.2'/></g></svg>">
+<title>Orbe · Earth Jukebox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Sistema Núcleo, tema oscuro (la escena 3D es oscura) */
+  :root { --ground: #000000; --grey-2: #1f1f1f; --hairline: #292929; --ink: #f5f5f5; --muted: #a0a0a0; --panel: #141414; --on-panel: #f5f5f5; --on-panel-muted: #a8a8a8;
+          --atmo-1: #131a21; --atmo-2: #46525c; --glass: rgba(245,245,245,.10); --glass-edge: rgba(255,255,255,.14); --glass-rim: rgba(255,255,255,.45); --glass-shade: rgba(0,0,0,.35);
+          --ease: cubic-bezier(0.16, 1, 0.3, 1); }
+  html, body { margin: 0; height: 100%; background: var(--ground); color: var(--ink); font-family: "Manrope", "Helvetica Neue", Helvetica, Arial, sans-serif; font-weight: 500; overflow: hidden; }
+  canvas { display: block; touch-action: none; cursor: grab; }
+  #inicio { position: fixed; inset: 0; display: grid; place-items: center; background: var(--ground); z-index: 2; padding: 24px; box-sizing: border-box; }
+  #inicio[hidden], #ayuda[hidden] { display: none; }
+  .caja { width: min(560px, 100%); box-sizing: border-box; text-align: left; color: var(--on-panel); }
+  h1 { font-size: clamp(48px, 9vw, 72px); line-height: .95; font-weight: 700; letter-spacing: -0.03em; margin: 0; }
+  /* Imagotipo: símbolo + nombre. Al cargar, los arcos se trazan de fuera hacia dentro, aparece el orbe y se enciende la luz. */
+  .marca { display: flex; align-items: center; gap: clamp(12px, 2vw, 18px); margin: 0 0 16px; }
+  .logo { width: clamp(52px, 9.6vw, 78px); height: auto; flex: none; overflow: visible; }
+  .logo .t { fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: trazo .9s cubic-bezier(0.16,1,0.3,1) forwards; }
+  .logo .t2 { animation-delay: .25s; } .logo .t3 { animation-delay: .5s; }
+  .logo .orbe { fill: currentColor; opacity: 0; transform-origin: 57px 50px; animation: orbe .6s cubic-bezier(0.16,1,0.3,1) 1.1s forwards; }
+  .logo .luz { fill: none; stroke: #ff5a3c; stroke-width: 3.6; stroke-linecap: round; opacity: 0; filter: drop-shadow(0 0 3px rgba(255,90,60,.8)); animation: luz .5s ease-out 1.6s forwards; }
+  .marca h1 { opacity: 0; animation: nombre .7s cubic-bezier(0.16,1,0.3,1) .9s forwards; }
+  @keyframes trazo { to { stroke-dashoffset: 0; } }
+  @keyframes orbe { from { opacity: 0; transform: scale(.8); } to { opacity: 1; transform: scale(1); } }
+  @keyframes luz { to { opacity: 1; } }
+  @keyframes nombre { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .logo .t, .logo .orbe, .logo .luz, .marca h1 { animation: none; stroke-dashoffset: 0; opacity: 1; } }
+  p { color: var(--on-panel-muted); font-size: 16px; line-height: 24px; margin: 0 0 32px; max-width: 44ch; }
+  .fila { display: flex; gap: 16px; flex-wrap: wrap; }
+  button { font: inherit; font-size: 16px; font-weight: 600; min-height: 48px; padding: 0 24px; border-radius: 999px; border: 0; background: var(--ink); color: #0a0a0a; cursor: pointer; transition: transform 140ms var(--ease); }
+  button.sec { background: var(--glass); color: var(--on-panel); -webkit-backdrop-filter: blur(12px) saturate(1.4); backdrop-filter: blur(12px) saturate(1.4);
+               box-shadow: inset 0 0 0 1px var(--glass-edge), inset 0 1.5px 1px var(--glass-rim), inset 0 -8px 12px -8px var(--glass-shade); }
+  button:active { transform: scale(0.96); }
+  button:disabled { opacity: .35; cursor: not-allowed; transform: none; }
+  button:focus-visible { outline: 1.5px solid var(--ink); outline-offset: 4px; }
+  .opcion { display: flex; align-items: center; gap: 12px; min-height: 48px; margin-top: 16px; font-size: 16px; line-height: 24px; color: var(--on-panel); cursor: pointer; }
+  .opcion input { width: 20px; height: 20px; accent-color: var(--ink); margin: 0; }
+  .opcion input:focus-visible { outline: 1.5px solid var(--ink); outline-offset: 4px; }
+  #estado { font-size: 12px; line-height: 18px; margin-top: 24px; color: var(--on-panel); }
+  #ayuda { position: fixed; left: 16px; bottom: 16px; font-size: 12px; line-height: 18px; color: var(--muted); z-index: 1; transition: opacity 1s; pointer-events: none; }
+  body.sensorial #ayuda { opacity: 0; }
+</style>
+</head>
+<body>
+<div id="inicio">
+  <div class="caja">
+    <div class="marca"><svg class="logo" role="img" aria-label="Orbe" viewBox="0 0 100 100"><path class="t t1" pathLength="1" d="M86.00 80.21 A47 47 0 1 1 90.70 26.50"/><path class="t t2" pathLength="1" d="M56.95 89.39 A40 40 0 1 1 56.95 10.61"/><path class="t t3" pathLength="1" d="M38.71 81.01 A33 33 0 0 1 32.51 22.01"/><circle class="orbe" cx="57" cy="50" r="25"/><path class="luz" d="M36.58 19.85 A33 33 0 0 1 45.41 17.32"/></svg><h1>Orbe</h1></div>
+    <p id="lema">Earth Jukebox. Tres lugares de la Tierra convertidos en música a partir de sus datos. Nada está grabado.</p>
+    <div class="fila">
+      <button id="vr">Entrar en VR</button>
+      <button id="pantalla" class="sec">Empezar en pantalla</button>
+    </div>
+    <label class="opcion"><input type="checkbox" id="descripciones"> <span id="descTxt">Mostrar descripciones en texto y voz</span></label>
+    <button id="idioma" class="sec" type="button" style="margin-top:8px">English</button>
+    <div id="estado">Usa audífonos.</div>
+  </div>
+</div>
+<div id="ayuda" hidden>Arrastra para mirar · ← → giran el lobby · Enter entra · I dato · D descripciones · L lobby</div>
+<script src="app.js"></script>
+</body>
+</html>

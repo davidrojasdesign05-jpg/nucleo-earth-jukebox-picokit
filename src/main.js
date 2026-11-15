@@ -244,7 +244,7 @@ let descKey = "", descState = "";
 let diagAt = 0;
 function updateDesc() {
   if (TUNING.diagnostico && app.state === "lobby" && performance.now() - diagAt > 1000) { diagAt = performance.now(); lobbyTitle.redraw(); }
-  const live = app.state !== "inicio"; desc.visible = live && app.desc; descBtn.visible = live;
+  const live = app.state !== "inicio" && app.state !== "intro"; desc.visible = live && app.desc; descBtn.visible = live;
   hud.scale.setScalar(lerp(hud.scale.x, app.info ? 1 : 0.62, 0.2));
   if (!live || !app.desc) return;
   const key = `${app.state}|${app.dash}|${synth.idx}|${NAV.front}`; if (key === descKey) return;
@@ -486,10 +486,10 @@ function show() {
   const a = AMBIENTES[app.dash]; dome.material.color.setHex(app.state === "lobby" ? 0x6e6e6e : a.color); for (const l of guideRings) l.material.color.set(lit(a.color));
   platGlow.material.color.set(lit(a.color)); platBody.material.color.set(0x101010).lerp(tmpC.setHex(a.color), 0.03);   // la plataforma toma un matiz del lugar
 }
-function goLobby() {
+function goLobby(silent = false) {
   if (app.state === "ambiente" || app.state === "fin") sfx("cierre");
   app.state = "lobby"; app.hover = null; setSensory(false); panHeight(); panHint.redraw();
-  synth.setLevel(TUNING.lobbyLevel ?? 0.16); show();   // el lobby es la antesala: la música queda al fondo
+  synth.setLevel(silent ? 0 : TUNING.lobbyLevel ?? 0.16); show();   // el lobby es la antesala: la música queda al fondo
 }
 function startAmbiente(id) {
   app.dash = id; app.state = "ambiente"; app.yearPos = 0; app.scale = 1; app.speed = 1; app.scrubbing = false; barsHere = 0;
@@ -632,7 +632,7 @@ function panTouch(hi, hand, world, dt) {
   }
 }
 function updateNav(dt) {
-  pan.visible = app.state !== "inicio"; worldRing.visible = app.state === "lobby";
+  pan.visible = app.state !== "inicio" && app.state !== "intro"; worldRing.visible = app.state === "lobby";
   const tr = NAV.trail; tr.life = Math.max(0, tr.life - dt * 1.4);
   for (const d of [1, -1]) { for (const m of [trailMesh[d], worldTrail[d]]) { m.visible = tr.dir === d && tr.life > 0.01; m.rotation.y = -tr.a; m.material.color.setScalar(tr.life * 0.9); } }
   pan.userData.top.material.emissive.setScalar(0.07 * tr.life);                              // el aro se enciende mientras lo usas
@@ -782,14 +782,14 @@ function updateXRInput(dt) {
 const mouse = new THREE.Vector2(); let drag = null, yaw = 0, pitch = 0, mouseVoz = null;
 function pick(ev, list) { mouse.set((ev.clientX / window.innerWidth) * 2 - 1, -(ev.clientY / window.innerHeight) * 2 + 1); raycaster.setFromCamera(mouse, camera); return raycaster.intersectObjects(list, false)[0]; }
 renderer.domElement.addEventListener("pointerdown", (ev) => {
-  if (app.xr || app.state === "inicio") return;
+  if (app.xr || app.state === "inicio" || app.state === "intro") return;
   const onSphere = app.state === "ambiente" && pick(ev, [sphereHit]);
   setCrush(0, onSphere ? onSphere.point : null, true);
   drag = { x: ev.clientX, y: ev.clientY, moved: 0, sphere: !!onSphere }; app.scrubbing = !!onSphere; if (onSphere) hud.redraw();
   renderer.domElement.setPointerCapture(ev.pointerId);
 });
 renderer.domElement.addEventListener("pointermove", (ev) => {
-  if (app.xr || app.state === "inicio") return;
+  if (app.xr || app.state === "inicio" || app.state === "intro") return;
   if (drag) {
     const dx = ev.clientX - drag.x, dy = ev.clientY - drag.y; drag.x = ev.clientX; drag.y = ev.clientY; drag.moved += Math.abs(dx) + Math.abs(dy);
     if (drag.sphere) setYear(app.yearPos + (dx / 500) * synth.count, true);
@@ -804,7 +804,7 @@ renderer.domElement.addEventListener("pointerup", (ev) => {
 });
 renderer.domElement.addEventListener("wheel", (ev) => { if (app.state === "ambiente") setScale(app.scale - Math.sign(ev.deltaY) * 0.1); }, { passive: true });
 window.addEventListener("keydown", (ev) => {
-  if (app.state === "inicio") return;
+  if (app.state === "inicio" || app.state === "intro") return;
   const k = ev.key.toLowerCase();
   if (app.state === "ambiente") {
     if (k === "arrowright") setYear(Math.floor(app.yearPos) + 1, true);
@@ -827,22 +827,59 @@ window.addEventListener("keydown", (ev) => {
 
 /* ---------- arranque ---------- */
 const $ = (id) => document.getElementById(id);
+/* ---------- pantalla de carga: "núcleo" aparece letra por letra con la ola del leitmotiv, salta con el acorde y da paso al lobby ---------- */
+const INTRO = { group: null, letters: [], line: null, sub: null, t0: 0, hit: false, word: "núcleo" };
+function buildIntro() {
+  if (INTRO.group) return;
+  const grp = INTRO.group = new THREE.Group(), PX = 0.001, H = 320, font = `600 210px ${FONT}`, track = 14;
+  const mk = (w, h, draw) => { const cv = document.createElement("canvas"); cv.width = w; cv.height = h; draw(cv.getContext("2d")); const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w * PX, h * PX), new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0, depthTest: false, depthWrite: false })); m.renderOrder = 30; grp.add(m); return m; };
+  const probe = document.createElement("canvas").getContext("2d"); probe.font = font;
+  const ws = [...INTRO.word].map((c) => probe.measureText(c).width), total = ws.reduce((a, b) => a + b, 0) + track * (ws.length - 1); let x = -total / 2;
+  [...INTRO.word].forEach((c, i) => {
+    const w = Math.ceil(ws[i]) + 60, m = mk(w, H, (g) => { g.font = font; g.textAlign = "center"; g.textBaseline = "alphabetic"; g.fillStyle = N.ink; g.fillText(c, w / 2, 232); });
+    m.userData.x = (x + ws[i] / 2) * PX; m.position.x = m.userData.x; INTRO.letters.push(m); x += ws[i] + track;
+  });
+  INTRO.line = new THREE.Mesh(new THREE.PlaneGeometry(total * PX, 0.003), new THREE.MeshBasicMaterial({ color: N.signal, transparent: true, opacity: 0, depthTest: false })); INTRO.line.renderOrder = 30; INTRO.line.position.y = -0.105; grp.add(INTRO.line);
+  INTRO.sub = mk(900, 80, (g) => { g.font = `500 30px ${FONT}`; g.textAlign = "center"; g.fillStyle = N.muted; try { g.letterSpacing = "10px"; } catch (e) { /* sin tracking */ } g.fillText("EARTH JUKEBOX", 450, 52); }); INTRO.sub.position.y = -0.17;
+  grp.scale.setScalar(1.6); scene.add(grp);
+}
+function updateIntro() {
+  const T = synth.ctx ? synth.ctx.currentTime - INTRO.t0 : 99, grp = INTRO.group, ss = (x) => { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); };
+  if (T < 0.6) { camera.getWorldPosition(hp2); grp.position.set(hp2.x, hp2.y - 0.02, hp2.z - 1.7); }      // a la altura de tus ojos
+  const out = 1 - ss((T - 5.4) / 1.1), hitK = T > 1.85 ? Math.exp(-(T - 1.85) * 4) : 0;
+  if (T > 1.85 && !INTRO.hit) { INTRO.hit = true; hx(null, "diente"); }                                  // la ola rompe: un solo toque
+  INTRO.letters.forEach((m, i) => {
+    const a = ss((T - 0.15 - i * 0.27) / 0.5), j = clamp((T - 3.57 - i * 0.07) / 0.5, 0, 1);              // aparece con la ola · salta con el acorde
+    m.material.opacity = a * out; m.position.y = (a - 1) * 0.03 + 0.11 * Math.sin(Math.PI * j) * (1 - 0.35 * j); m.scale.setScalar(1 + 0.09 * hitK + 0.06 * Math.sin(Math.PI * j));
+  });
+  const la = ss((T - 0.1) / 1.75); INTRO.line.scale.x = Math.max(0.001, la); INTRO.line.position.x = -(1 - la) * INTRO.line.geometry.parameters.width / 2; INTRO.line.material.opacity = (0.35 + 0.65 * hitK) * Math.min(1, la * 4) * out;
+  INTRO.sub.material.opacity = 0.9 * ss((T - 2.0) / 1.2) * out;
+  if (T > 6.6) endIntro();
+}
+function endIntro() {
+  if (app.state !== "intro") return;
+  INTRO.group.visible = false; $("ayuda").hidden = app.xr;
+  goLobby(true); yaw = 0; pitch = 0;                                                                      // aterrizas en silencio…
+  setTimeout(() => { if (app.state === "lobby") synth.setLevel(TUNING.lobbyLevel ?? 0.16); }, (TUNING.silencioLobby ?? 1.6) * 1000);   // …y después entra la sala
+}
 async function begin(vr) {
   app.desc = !!($("descripciones") && $("descripciones").checked);
+  synth.level = 0; if (synth.nodes) synth.nodes.master.gain.value = 0;                                    // nada suena hasta que termina la carga
   await synth.play();
-  const lm = LEITMOTIV[TUNING.leitmotiv];                  // la firma sonora al entrar: va directa a la salida y la música del lobby espera a que termine
-  let lmDur = 0;
-  if (lm && synth.ctx) { try { const g = synth.ctx.createGain(); g.gain.value = 0.72; g.connect(synth.ctx.destination); lmDur = lm.play(synth.ctx, g, synth.ctx.currentTime + 0.1) || 0; } catch (e) { lmDur = 0; } }
   if (vr) {
     try {
       const session = await navigator.xr.requestSession("immersive-vr", { optionalFeatures: ["local-floor", "bounded-floor"] });
       await renderer.xr.setSession(session); app.xr = true; haptics.setSources(session);
       session.addEventListener("inputsourceschange", () => haptics.setSources(session));
-      session.addEventListener("end", () => { app.xr = false; $("inicio").hidden = false; synth.stop(); app.state = "inicio"; });
+      session.addEventListener("end", () => { app.xr = false; $("inicio").hidden = false; synth.stop(); app.state = "inicio"; if (INTRO.group) INTRO.group.visible = false; show(); });
     } catch (e) { $("estado").textContent = "No se pudo entrar a VR: " + e.message; app.xr = false; }
   }
-  $("inicio").hidden = true; $("ayuda").hidden = app.xr; goLobby(); yaw = 0; pitch = 0;
-  if (lmDur) { synth.setLevel(0.03); setTimeout(() => { if (app.state === "lobby") synth.setLevel(TUNING.lobbyLevel ?? 0.16); }, Math.max(0, lmDur - 1.6) * 1000); }
+  $("inicio").hidden = true; $("ayuda").hidden = true; yaw = 0; pitch = 0;
+  buildIntro(); INTRO.group.visible = true; INTRO.hit = false; INTRO.letters.forEach((m) => (m.material.opacity = 0));
+  app.state = "intro"; show(); INTRO.t0 = synth.ctx.currentTime + (vr ? 0.9 : 0.35);                      // en el visor, un respiro para que la imagen llegue antes que el sonido
+  const lm = LEITMOTIV[TUNING.leitmotiv];                  // la firma sonora: va directa a la salida, sincronizada con las letras
+  if (lm) { try { const g = synth.ctx.createGain(); g.gain.value = 0.72; g.connect(synth.ctx.destination); lm.play(synth.ctx, g, INTRO.t0); } catch (e) { /* sin leitmotiv: la carga sigue */ } }
 }
 $("pantalla").addEventListener("click", () => begin(false));
 $("vr").addEventListener("click", () => begin(true));
@@ -857,6 +894,7 @@ show(); gLobby.visible = false; gAmb.visible = false;
 renderer.setAnimationLoop(() => {
   const dt = Math.min(0.05, clock.getDelta()), t = clock.elapsedTime;
   if (!app.xr) { camera.rotation.y = -yaw; camera.rotation.x = -pitch; }
+  if (app.state === "intro") updateIntro();
   updateXRInput(dt); updateNav(dt); updateDesc();
   { const nowI = performance.now();                        // lobby en reposo: una llamada suave te invita a girar, una vez a cada lado
     if (app.state !== "lobby" || NAV.grab || Math.abs(NAV.vel) > 0.05) inviteAt = nowI + 9000;
